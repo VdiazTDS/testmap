@@ -1,3 +1,8 @@
+window.addEventListener("error", e => {
+  console.error("JS ERROR:", e.message, "at line", e.lineno);
+});
+
+
 // ================= SUPABASE CONFIG =================
 // Connection info for cloud file storage
 const SUPABASE_URL = "https://lffazhbwvorwxineklsy.supabase.co";
@@ -226,16 +231,17 @@ async function listFiles() {
   const routeFiles = {};
   const summaryFiles = {};
 
-  // Separate route files and summary files
-  data.forEach(file => {
-    const name = file.name.toLowerCase();
+ // Separate route files and summary files
+data.forEach(file => {
+  const name = file.name.toLowerCase();
 
-    if (name.includes("route summary")) {
-      summaryFiles[normalizeName(name)] = file.name;
-    } else {
-      routeFiles[normalizeName(name)] = file.name;
-    }
-  });
+  if (name.includes("routesummary")) {
+    summaryFiles[normalizeName(name)] = file.name;
+  } else {
+    routeFiles[normalizeName(name)] = file.name;
+  }
+});
+
 
   // Build UI
   Object.keys(routeFiles).forEach(key => {
