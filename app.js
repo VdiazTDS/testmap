@@ -228,6 +228,8 @@ async function listFiles() {
       const { data } = sb.storage.from(BUCKET).getPublicUrl(routeName);
       const r = await fetch(data.publicUrl);
       processExcelBuffer(await r.arrayBuffer());
+loadSummaryFor(routeName);
+
     };
 
     li.appendChild(openBtn);
@@ -385,15 +387,6 @@ async function loadSummaryFor(fileName) {
 }
 
 
-openBtn.onclick = async () => {
-  const { data } = sb.storage.from(BUCKET).getPublicUrl(file.name);
-  const r = await fetch(data.publicUrl);
-
-  processExcelBuffer(await r.arrayBuffer());
-
-  // NEW
-  loadSummaryFor(file.name);
-};
 
 
 
