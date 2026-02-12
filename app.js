@@ -258,6 +258,56 @@ toggleSidebarBtn.onclick = () => {
   setTimeout(() => map.invalidateSize(), 200);
 };
 
+function showRouteSummary(rows) {
+  const box = document.getElementById("routeSummary");
+  box.innerHTML = "";
 
-// ================= INIT =================
+  rows.forEach(r => {
+    if (!r["Route ID"]) return;
+
+    const div = document.createElement("div");
+    div.style.marginBottom = "8px";
+
+    div.innerHTML = `
+      <strong>Route ${r["Route ID"]}</strong><br>
+      Stops: ${r["Seq"] || "-"}<br>
+      Distance: ${r["Distance"] || "-"} miles<br>
+      Total Time: ${r["Total"] || "-"}
+    `;
+
+    box.appendChild(div);
+  });
+}
+
+async function loadSummaryFor(fileName) {
+  const summaryName = fileName.replace(".xlsx", "_summary.xlsx");
+
+  const { data } = sb.storage.from(BUCKET).getPublicUrl(summaryName);
+
+  try {
+    const r = await fetch(data.publicUrl);
+    if (!r.ok) throw new Error("No summary");
+
+    const wb = XLSX.read(new Uint8Array(await r.arrayBuffer()), { type: "array" });
+    const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
+
+    showRouteSummary(rows);
+  } catch {
+    document.getElementById("routeSummary").textContent = "No summary available";
+  }
+}
+
+
+openBtn.onclick = async () => {
+  const { data } = sb.storage.from(BUCKET).getPublicUrl(file.name);
+  const r = await fetch(data.publicUrl);
+
+  processExcelBuffer(await r.arrayBuffer());
+
+  // NEW
+  loadSummaryFor(file.name);
+};
+
+
+
 listFiles();
