@@ -9,6 +9,15 @@ const SUPABASE_URL = "https://lffazhbwvorwxineklsy.supabase.co";
 const SUPABASE_KEY = "sb_publishable_Lfh2zlIiTSMB0U-Fe5o6Jg_mJ1qkznh";
 const BUCKET = "excel-files";
 
+//======
+
+document.addEventListener("DOMContentLoaded", () => {
+  initApp();
+});
+
+//======
+
+
 // Create Supabase client
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
@@ -377,4 +386,46 @@ async function loadSummaryFor(routeFileName) {
 
 
 // ================= START APP =================
-listFiles();
+function initApp() {
+
+  // ===== BASE MAP DROPDOWN =====
+  const baseSelect = document.getElementById("baseMapSelect");
+  if (baseSelect) {
+    baseSelect.addEventListener("change", e => {
+      Object.values(baseMaps).forEach(l => map.removeLayer(l));
+      baseMaps[e.target.value].addTo(map);
+    });
+  }
+
+  // ===== SIDEBAR TOGGLE (DESKTOP) =====
+  const toggleSidebarBtn = document.getElementById("toggleSidebarBtn");
+  const sidebar = document.querySelector(".sidebar");
+  const appContainer = document.querySelector(".app-container");
+
+  if (toggleSidebarBtn && sidebar && appContainer) {
+    toggleSidebarBtn.addEventListener("click", () => {
+      appContainer.classList.toggle("collapsed");
+
+      toggleSidebarBtn.textContent =
+        appContainer.classList.contains("collapsed") ? "▶" : "◀";
+
+      setTimeout(() => map.invalidateSize(), 200);
+    });
+  }
+
+  // ===== MOBILE MENU =====
+  const mobileMenuBtn = document.getElementById("mobileMenuBtn");
+
+  if (mobileMenuBtn && sidebar) {
+    mobileMenuBtn.addEventListener("click", () => {
+      const open = sidebar.classList.toggle("open");
+      mobileMenuBtn.textContent = open ? "✕" : "☰";
+
+      setTimeout(() => map.invalidateSize(), 200);
+    });
+  }
+
+  // ===== INITIAL DATA LOAD =====
+  listFiles();
+}
+
