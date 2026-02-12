@@ -274,7 +274,16 @@ async function listFiles() {
 async function uploadFile(file) {
   if (!file) return;
 
-  await sb.storage.from(BUCKET).upload(file.name, file, { upsert: true });
+  const { error } = await sb
+    .storage
+    .from(BUCKET)
+    .upload(file.name, file, { upsert: true });
+
+  if (error) {
+    console.error("UPLOAD ERROR:", error);
+    alert("Upload failed: " + error.message);
+    return;
+  }
 
   processExcelBuffer(await file.arrayBuffer());
   listFiles();
