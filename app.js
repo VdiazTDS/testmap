@@ -385,10 +385,15 @@ async function loadSummaryFor(routeFileName) {
 
   const normalizedRoute = normalizeName(routeFileName);
 
-  const summary = data.find(f =>
-    f.name.toLowerCase().includes("routesummary") &&
-    normalizeName(f.name) === normalizedRoute
-  );
+  const summary = data.find(f => {
+  const lower = f.name.toLowerCase();
+
+  return (
+    lower.includes("routesummary") ||
+    lower.includes("route summary")
+  ) && normalizeName(f.name) === normalizedRoute;
+});
+
 
   if (!summary) {
     document.getElementById("routeSummary").textContent = "No summary available";
