@@ -368,9 +368,14 @@ function showRouteSummary(rows, worksheet) {
   table.appendChild(tbody);
   tableBox.appendChild(table);
 
-  // ✅ AUTO-OPEN THE SUMMARY PANEL
-  panel.classList.remove("collapsed");
-  btn.textContent = "▼";
+// AUTO-OPEN + FORCE VISIBLE HEIGHT
+panel.classList.remove("collapsed");
+
+const savedHeight = localStorage.getItem("summaryHeight");
+panel.style.height = (savedHeight && savedHeight > 60 ? savedHeight : 250) + "px";
+
+btn.textContent = "▼";
+
 }
 
 
