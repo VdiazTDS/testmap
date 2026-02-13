@@ -520,3 +520,53 @@ header p {
   flex: 1;
   padding: 10px;
 }
+/* ===== Bottom summary header layout ===== */
+.bottom-summary-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background: #1e1e1e;
+  border-top: 1px solid #333;
+}
+
+/* Title */
+.summary-title {
+  flex: 1;
+  text-align: center;
+  font-weight: 600;
+  color: #fff;
+}
+
+/* ===== Modern action button ===== */
+.modern-btn {
+  background: linear-gradient(135deg, #4facfe, #00c6ff);
+  border: none;
+  color: white;
+  padding: 6px 12px;
+  font-size: 13px;
+  font-weight: 500;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+}
+
+.modern-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+}
+
+.modern-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+/* Collapse arrow button */
+.collapse-btn {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+}
