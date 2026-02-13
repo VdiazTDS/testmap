@@ -121,22 +121,6 @@ function updateSelectionCount() {
 
 
 //========================
-const clearBtn = document.getElementById("clearSelectionBtn");
-
-if (clearBtn) {
-  clearBtn.onclick = () => {
-    drawnLayer.clearLayers();
-
-    Object.entries(routeDayGroups).forEach(([key, group]) => {
-      const sym = symbolMap[key];
-      group.layers.forEach(marker => {
-        marker.setStyle?.({ color: sym.color, fillColor: sym.color });
-      });
-    });
-
-    document.getElementById("selectionCount").textContent = 0;
-  };
-}
 
  
 
@@ -552,6 +536,30 @@ const toggleSelectionBtn = document.getElementById("toggleSelectionBtn");
 if (selectionBox && toggleSelectionBtn) {
   toggleSelectionBtn.onclick = () => {
     const collapsed = selectionBox.classList.toggle("collapsed");
+
+//=== clear selection button
+
+    const clearBtn = document.getElementById("clearSelectionBtn");
+
+if (clearBtn) {
+  clearBtn.onclick = () => {
+    drawnLayer.clearLayers();
+
+    Object.entries(routeDayGroups).forEach(([key, group]) => {
+      const sym = symbolMap[key];
+      group.layers.forEach(marker => {
+        marker.setStyle?.({ color: sym.color, fillColor: sym.color });
+      });
+    });
+
+    document.getElementById("selectionCount").textContent = 0;
+  };
+}
+
+
+
+
+    
 
     // flip arrow direction
     toggleSelectionBtn.textContent = collapsed ? "❮" : "❯";
