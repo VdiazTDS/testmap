@@ -119,15 +119,7 @@ header p {
   color: #000;
 }
 
-#resetMapBtn {
-  background: #42a5f5;
-  border: none;
-  border-radius: 8px;
-  padding: 8px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.2s;
-}
+
 
 #resetMapBtn:hover {
   background: #64b5f6;
@@ -583,25 +575,7 @@ header p {
 
 /* ===== Modern action button ===== */
 /* ===== Modern primary action button ===== */
-.modern-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
 
-  background: linear-gradient(135deg, #5ac8fa, #0a84ff);
-  color: white;
-  border: none;
-
-  padding: 6px 14px;
-  font-size: 13px;
-  font-weight: 600;
-
-  border-radius: 999px; /* pill shape */
-  cursor: pointer;
-
-  box-shadow: 0 2px 8px rgba(0,0,0,0.35);
-  transition: all 0.18s ease;
-}
 
 /* Hover */
 .modern-btn:hover {
@@ -618,13 +592,7 @@ header p {
 }
 
 /* Collapse arrow button */
-.collapse-btn {
-  background: none;
-  border: none;
-  color: white;
-  font-size: 16px;
-  cursor: pointer;
-}
+
 /* ===== FINAL HEADER LAYOUT FIX ===== */
 .bottom-summary-header {
   display: grid !important;
