@@ -695,10 +695,58 @@ header p {
 }
 
 
-/* Move toggle when sidebar is open */
-#selectionBox:not(.collapsed) + .sidebar-toggle-right {
-  right: 220px;
+/* ===== RIGHT SIDEBAR ===== */
+
+/* Container */
+#selectionBox {
+  position: absolute;
+  right: 0;
+  top: 120px;
+  width: 220px;
+
+  background: #1e1e1e;
+  border-left: 1px solid #333;
+
+  padding: 12px 16px;
+
+  transition: transform 0.25s ease;
+  z-index: 500;
 }
+
+/* Collapsed state — slide fully off screen */
+#selectionBox.collapsed {
+  transform: translateX(100%);
+}
+
+/* Toggle button (attached to sidebar edge) */
+.sidebar-toggle-right {
+  position: absolute;
+  left: -28px;          /* keeps it glued to sidebar */
+  top: 12px;
+
+  width: 28px;
+  height: 28px;
+
+  border-radius: 6px 0 0 6px;
+  border: 1px solid #333;
+
+  background: #2b7cff;
+  color: #fff;
+
+  cursor: pointer;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  z-index: 600;
+}
+
+/* When sidebar is collapsed, keep toggle visible at screen edge */
+#selectionBox.collapsed .sidebar-toggle-right {
+  left: -28px;
+}
+
 
 /* ===== RESIZE HINT BAR ===== */
 .resize-hint {
