@@ -467,6 +467,16 @@ function initApp() {
 document.getElementById("closeSummary").onclick = () => {
   document.getElementById("summaryPanel").classList.add("hidden");
 };
+// ===== TOGGLE BOTTOM SUMMARY =====
+function toggleSummary() {
+  const panel = document.getElementById("bottomSummary");
+  const btn = document.getElementById("summaryToggleBtn");
+
+  panel.classList.toggle("collapsed");
+
+  // flip arrow direction
+  btn.textContent = panel.classList.contains("collapsed") ? "▲" : "▼";
+}
 
   
   // ===== INITIAL DATA LOAD =====
