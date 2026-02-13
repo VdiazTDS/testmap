@@ -327,53 +327,41 @@ function findColumn(row, keywords) {
   );
 }
 
-function showRouteSummary(rows) {
-  const panel = document.getElementById("bottomSummary");
-  const box = document.getElementById("routeSummaryTable");
 
-  if (!panel || !box) return;
+  function showRouteSummary(rows, worksheet) {
+  const tableBox = document.getElementById("routeSummaryTable");
+  if (!tableBox) return;
 
-  box.innerHTML = "";
+  tableBox.innerHTML = "";
 
   if (!rows || !rows.length) {
-    box.textContent = "No summary data found";
+    tableBox.textContent = "No summary data found";
     return;
   }
 
-  const table = document.createElement("table");
+  // ✅ Get headers EXACTLY in Excel order
+  const headers = XLSX.utils.sheet_to_json(worksheet, { header: 1 })[0];
 
+  const table = document.createElement("table");
   const thead = document.createElement("thead");
   const tbody = document.createElement("tbody");
 
-  // Get ALL unique columns from every row
-// Get column order exactly as it appears in Excel
-const sheet = XLSX.utils.json_to_sheet(rows);
-const range = XLSX.utils.decode_range(sheet["!ref"]);
-
-const columns = [];
-
-for (let C = range.s.c; C <= range.e.c; ++C) {
-  const cell = sheet[XLSX.utils.encode_cell({ r: 0, c: C })];
-  if (cell && cell.v) columns.push(cell.v);
-}
-
-
-  // Header
+  // ===== HEADER ROW =====
   const headerRow = document.createElement("tr");
-  columns.forEach(col => {
+  headers.forEach(h => {
     const th = document.createElement("th");
-    th.textContent = col;
+    th.textContent = h ?? "";
     headerRow.appendChild(th);
   });
   thead.appendChild(headerRow);
 
-  // Rows
+  // ===== DATA ROWS =====
   rows.forEach(r => {
     const tr = document.createElement("tr");
 
-    columns.forEach(col => {
+    headers.forEach(h => {
       const td = document.createElement("td");
-      td.textContent = r[col] ?? "";
+      td.textContent = r[h] ?? "";
       tr.appendChild(td);
     });
 
@@ -382,10 +370,7 @@ for (let C = range.s.c; C <= range.e.c; ++C) {
 
   table.appendChild(thead);
   table.appendChild(tbody);
-  box.appendChild(table);
-
-  // Open the bottom panel automatically
-  panel.classList.remove("collapsed");
+  tableBox.appendChild(table);
 }
 
   
@@ -429,9 +414,12 @@ async function loadSummaryFor(routeFileName) {
   const r = await fetch(urlData.publicUrl);
 
   const wb = XLSX.read(new Uint8Array(await r.arrayBuffer()), { type: "array" });
-  const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
+const ws = wb.Sheets[wb.SheetNames[0]];
 
-  showRouteSummary(rows);
+const rows = XLSX.utils.sheet_to_json(ws);
+
+showRouteSummary(rows, ws);
+
 }
 
 
