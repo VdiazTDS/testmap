@@ -346,13 +346,17 @@ function showRouteSummary(rows) {
   const tbody = document.createElement("tbody");
 
   // Get ALL unique columns from every row
-const columnSet = new Set();
+// Get column order exactly as it appears in Excel
+const sheet = XLSX.utils.json_to_sheet(rows);
+const range = XLSX.utils.decode_range(sheet["!ref"]);
 
-rows.forEach(r => {
-  Object.keys(r).forEach(col => columnSet.add(col));
-});
+const columns = [];
 
-const columns = Array.from(columnSet);
+for (let C = range.s.c; C <= range.e.c; ++C) {
+  const cell = sheet[XLSX.utils.encode_cell({ r: 0, c: C })];
+  if (cell && cell.v) columns.push(cell.v);
+}
+
 
   // Header
   const headerRow = document.createElement("tr");
