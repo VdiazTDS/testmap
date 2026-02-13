@@ -700,4 +700,41 @@ header p {
   right: 220px;
 }
 
+/* ===== RESIZE HINT BAR ===== */
+.resize-hint {
+  position: absolute;
+  top: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+
+  font-size: 11px;
+  color: #888;
+  background: #1e1e1e;
+
+  padding: 2px 8px;
+  border-radius: 6px;
+
+  pointer-events: none;
+  opacity: 0.85;
+}
+
+/* Thin grab line like native apps */
+.bottom-summary-header::before {
+  content: "";
+  position: absolute;
+  top: 4px;
+  left: 50%;
+  transform: translateX(-50%);
+
+  width: 40px;
+  height: 4px;
+  border-radius: 3px;
+  background: #555;
+}
+
+/* Cursor change = huge UX signal */
+.bottom-summary-header {
+  cursor: ns-resize;
+  position: relative;
+}
 
