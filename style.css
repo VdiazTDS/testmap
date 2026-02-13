@@ -628,5 +628,5 @@ header p {
 
 /* Move collapse arrow left so Leaflet watermark never covers it */
 .collapse-btn {
-  margin-right: 100px;  /* ← key spacing from watermark */
+  margin-right: 170px;  /* ← key spacing from watermark */
 }
