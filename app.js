@@ -545,7 +545,25 @@ function toggleSummary() {
 
 function initApp() {
 
+// ===== RIGHT SIDEBAR TOGGLE =====
+const selectionBox = document.getElementById("selectionBox");
+const toggleSelectionBtn = document.getElementById("toggleSelectionBtn");
 
+if (selectionBox && toggleSelectionBtn) {
+  toggleSelectionBtn.onclick = () => {
+    const collapsed = selectionBox.classList.toggle("collapsed");
+
+    // flip arrow direction
+    toggleSelectionBtn.textContent = collapsed ? "❮" : "❯";
+  };
+}
+
+
+
+
+
+
+  
 // ===== FILE UPLOAD (DRAG + CLICK) =====
 const dropZone = document.getElementById("dropZone");
 
