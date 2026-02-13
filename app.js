@@ -471,6 +471,56 @@ function initApp() {
 
       setTimeout(() => map.invalidateSize(), 200);
     });
+
+    // ===== DRAGGABLE SUMMARY PANEL =====
+const panel = document.getElementById("bottomSummary");
+const header = document.querySelector(".bottom-summary-header");
+
+if (panel && header) {
+  let isDragging = false;
+  let startY = 0;
+  let startBottom = 0;
+
+  // Restore saved position
+  const savedBottom = localStorage.getItem("summaryBottom");
+  if (savedBottom !== null) {
+    panel.style.bottom = savedBottom + "px";
+  }
+
+  header.addEventListener("mousedown", e => {
+    isDragging = true;
+    startY = e.clientY;
+    startBottom = parseInt(window.getComputedStyle(panel).bottom);
+    document.body.style.userSelect = "none";
+  });
+
+  document.addEventListener("mousemove", e => {
+    if (!isDragging) return;
+
+    const delta = startY - e.clientY;
+    let newBottom = startBottom + delta;
+
+    // limit movement so it never leaves screen
+    newBottom = Math.max(-220, Math.min(window.innerHeight - 100, newBottom));
+
+    panel.style.bottom = newBottom + "px";
+  });
+
+  document.addEventListener("mouseup", () => {
+    if (!isDragging) return;
+
+    isDragging = false;
+    document.body.style.userSelect = "";
+
+    // save position
+    localStorage.setItem(
+      "summaryBottom",
+      parseInt(window.getComputedStyle(panel).bottom)
+    );
+  });
+}
+
+    
   }
 //========
 
