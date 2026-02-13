@@ -374,52 +374,7 @@ function showRouteSummary(rows) {
 }
 
 
-  // ===== CREATE TABLE =====
-  const table = document.createElement("table");
-  table.style.width = "100%";
-  table.style.borderCollapse = "collapse";
-  table.style.fontSize = "13px";
-
-  const thead = document.createElement("thead");
-  const tbody = document.createElement("tbody");
-
-  // ===== GET ALL COLUMN NAMES (dynamic) =====
-  const columns = Object.keys(rows[0]);
-
-  // ===== HEADER ROW =====
-  const headerRow = document.createElement("tr");
-
-  columns.forEach(col => {
-    const th = document.createElement("th");
-    th.textContent = col;
-    th.style.borderBottom = "1px solid #555";
-    th.style.padding = "6px";
-    th.style.textAlign = "left";
-    th.style.background = "#1e1e1e";
-    headerRow.appendChild(th);
-  });
-
-  thead.appendChild(headerRow);
-
-  // ===== DATA ROWS =====
-  rows.forEach(r => {
-    const tr = document.createElement("tr");
-
-    columns.forEach(col => {
-      const td = document.createElement("td");
-      td.textContent = r[col] ?? "";
-      td.style.padding = "6px";
-      td.style.borderBottom = "1px solid #333";
-      tr.appendChild(td);
-    });
-
-    tbody.appendChild(tr);
-  });
-
-  table.appendChild(thead);
-  table.appendChild(tbody);
-  box.appendChild(table);
-}
+  
 
 
 
