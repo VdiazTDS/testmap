@@ -418,6 +418,16 @@ const rows = XLSX.utils.sheet_to_json(ws);
 
 showRouteSummary(rows, ws);
 
+// 🔽 FORCE the panel open when a summary exists
+const panel = document.getElementById("bottomSummary");
+const btn = document.getElementById("summaryToggleBtn");
+
+if (panel && btn) {
+  panel.classList.remove("collapsed");
+  btn.textContent = "▼";
+}
+
+
 }
 
 
