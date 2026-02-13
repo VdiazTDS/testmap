@@ -478,118 +478,105 @@ function initApp() {
     mobileMenuBtn.addEventListener("click", () => {
       const open = sidebar.classList.toggle("open");
       mobileMenuBtn.textContent = open ? "✕" : "☰";
-
       setTimeout(() => map.invalidateSize(), 200);
     });
-
-   // ===== RESIZABLE BOTTOM SUMMARY PANEL =====
-const panel = document.getElementById("bottomSummary");
-const header = document.querySelector(".bottom-summary-header");
-const toggleBtn = document.getElementById("summaryToggleBtn");
-
-if (panel && header) {
-  let isDragging = false;
-  let startY = 0;
-  let startHeight = 0;
-
-  // Restore saved height
-  const savedHeight = localStorage.getItem("summaryHeight");
-  if (savedHeight) {
-    panel.style.height = savedHeight + "px";
   }
 
-  // ===== DRAG TO RESIZE =====
-  header.addEventListener("mousedown", e => {
-    isDragging = true;
-    startY = e.clientY;
-    startHeight = panel.offsetHeight;
-    document.body.style.userSelect = "none";
-  });
+  // ===== RESIZABLE BOTTOM SUMMARY PANEL =====
+  const panel = document.getElementById("bottomSummary");
+  const header = document.querySelector(".bottom-summary-header");
+  const toggleBtn = document.getElementById("summaryToggleBtn");
 
-  document.addEventListener("mousemove", e => {
-    if (!isDragging) return;
+  if (panel && header) {
+    let isDragging = false;
+    let startY = 0;
+    let startHeight = 0;
 
-    const delta = startY - e.clientY;
-    let newHeight = startHeight + delta;
+    // Restore saved height
+    const savedHeight = localStorage.getItem("summaryHeight");
+    if (savedHeight) panel.style.height = savedHeight + "px";
 
-    // Limits
-    const minHeight = 40;                 // collapsed header size
-    const maxHeight = window.innerHeight - 100;
+    // Drag resize
+    header.addEventListener("mousedown", e => {
+      isDragging = true;
+      startY = e.clientY;
+      startHeight = panel.offsetHeight;
+      document.body.style.userSelect = "none";
+    });
 
-    newHeight = Math.max(minHeight, Math.min(maxHeight, newHeight));
+    document.addEventListener("mousemove", e => {
+      if (!isDragging) return;
 
-    panel.style.height = newHeight + "px";
-  });
+      const delta = startY - e.clientY;
+      let newHeight = startHeight + delta;
 
-  document.addEventListener("mouseup", () => {
-    if (!isDragging) return;
+      const minHeight = 40;
+      const maxHeight = window.innerHeight - 100;
 
-    isDragging = false;
-    document.body.style.userSelect = "";
+      newHeight = Math.max(minHeight, Math.min(maxHeight, newHeight));
+      panel.style.height = newHeight + "px";
+    });
 
-    // Save height
-    localStorage.setItem("summaryHeight", panel.offsetHeight);
-  });
+    document.addEventListener("mouseup", () => {
+      if (!isDragging) return;
+      isDragging = false;
+      document.body.style.userSelect = "";
+      localStorage.setItem("summaryHeight", panel.offsetHeight);
+    });
 
-  // ===== COLLAPSE TOGGLE =====
-  if (toggleBtn) {
-    toggleBtn.onclick = () => {
-      panel.classList.toggle("collapsed");
+    // Collapse toggle
+    if (toggleBtn) {
+      toggleBtn.onclick = () => {
+        panel.classList.toggle("collapsed");
 
-      if (panel.classList.contains("collapsed")) {
-        panel.style.height = "40px";
-        toggleBtn.textContent = "▲";
-      } else {
-        const restored = localStorage.getItem("summaryHeight") || 250;
-        panel.style.height = restored + "px";
-        toggleBtn.textContent = "▼";
+        if (panel.classList.contains("collapsed")) {
+          panel.style.height = "40px";
+          toggleBtn.textContent = "▲";
+        } else {
+          const restored = localStorage.getItem("summaryHeight") || 250;
+          panel.style.height = restored + "px";
+          toggleBtn.textContent = "▼";
+        }
+      };
+    }
+  }
+
+  // ===== POP-OUT SUMMARY WINDOW =====
+  const popoutBtn = document.getElementById("popoutSummaryBtn");
+
+  if (popoutBtn) {
+    popoutBtn.onclick = () => {
+      const tableHTML = document.getElementById("routeSummaryTable")?.innerHTML;
+
+      if (!tableHTML || tableHTML.includes("No summary")) {
+        alert("No route summary loaded.");
+        return;
       }
+
+      const win = window.open("", "_blank", "width=900,height=600,resizable=yes,scrollbars=yes");
+
+      win.document.write(`
+        <html>
+          <head>
+            <title>Route Summary</title>
+            <style>
+              body { font-family: Roboto, sans-serif; margin: 10px; }
+              table { border-collapse: collapse; width: 100%; }
+              th, td { border: 1px solid #ccc; padding: 6px; text-align: left; }
+              th { background: #f4f4f4; position: sticky; top: 0; }
+            </style>
+          </head>
+          <body>
+            <h2>Route Summary</h2>
+            ${tableHTML}
+          </body>
+        </html>
+      `);
+
+      win.document.close();
     };
   }
-}
 
-    
-  }
-//========
-// ===== POP-OUT ROUTE SUMMARY WINDOW =====
-const popoutBtn = document.getElementById("popoutSummaryBtn");
-
-if (popoutBtn) {
-  popoutBtn.onclick = () => {
-    const tableHTML = document.getElementById("routeSummaryTable")?.innerHTML;
-
-    if (!tableHTML || tableHTML.includes("No summary")) {
-      alert("No route summary loaded.");
-      return;
-    }
-
-    const win = window.open("", "_blank", "width=900,height=600,resizable=yes,scrollbars=yes");
-
-    win.document.write(`
-      <html>
-        <head>
-          <title>Route Summary</title>
-          <style>
-            body { font-family: Roboto, sans-serif; margin: 10px; }
-            table { border-collapse: collapse; width: 100%; }
-            th, td { border: 1px solid #ccc; padding: 6px; text-align: left; }
-            th { background: #f4f4f4; position: sticky; top: 0; }
-          </style>
-        </head>
-        <body>
-          <h2>Route Summary</h2>
-          ${tableHTML}
-        </body>
-      </html>
-    `);
-
-    win.document.close();
-  };
-}
-
-
-  
   // ===== INITIAL DATA LOAD =====
   listFiles();
-
 }
