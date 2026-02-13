@@ -47,6 +47,85 @@ const baseMaps = {
     "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
   )
 };
+//======
+
+// ================= POLYGON SELECT =================
+let drawnLayer = new L.FeatureGroup();
+map.addLayer(drawnLayer);
+
+const drawControl = new L.Control.Draw({
+  draw: {
+    polygon: true,
+    rectangle: true,
+    circle: false,
+    marker: false,
+    polyline: false,
+    circlemarker: false
+  },
+  edit: { featureGroup: drawnLayer }
+});
+
+map.addControl(drawControl);
+
+// helper: check if marker inside polygon
+function pointInPolygon(latlng, polygon) {
+  return L.Polygon.prototype.isPrototypeOf(polygon)
+    ? polygon.getBounds().contains(latlng)
+    : false;
+}
+
+// when polygon created
+map.on(L.Draw.Event.CREATED, e => {
+  drawnLayer.clearLayers();
+  drawnLayer.addLayer(e.layer);
+
+  updateSelectionCount();
+});
+
+// when polygon edited/deleted
+map.on(L.Draw.Event.EDITED, updateSelectionCount);
+map.on(L.Draw.Event.DELETED, () => {
+  document.getElementById("selectionCount").textContent = 0;
+});
+
+
+//===============
+
+
+function updateSelectionCount() {
+  const polygon = drawnLayer.getLayers()[0];
+  if (!polygon) return;
+
+  let count = 0;
+
+  Object.values(routeDayGroups).forEach(group => {
+    group.layers.forEach(marker => {
+      const latlng = marker.getLatLng();
+
+      if (polygon.getBounds().contains(latlng) && map.hasLayer(marker)) {
+        marker.setStyle?.({ color: "#ffff00", fillColor: "#ffff00" }); // highlight
+        count++;
+      } else {
+        // reset color
+        const key = Object.keys(symbolMap).find(k =>
+          routeDayGroups[k]?.layers.includes(marker)
+        );
+        if (key) {
+          const sym = symbolMap[key];
+          marker.setStyle?.({ color: sym.color, fillColor: sym.color });
+        }
+      }
+    });
+  });
+
+  document.getElementById("selectionCount").textContent = count;
+}
+
+
+
+
+
+
 
 // Default map
 baseMaps.streets.addTo(map);
