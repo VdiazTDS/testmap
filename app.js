@@ -472,25 +472,27 @@ function initApp() {
       setTimeout(() => map.invalidateSize(), 200);
     });
 
-    // ===== DRAGGABLE SUMMARY PANEL =====
+   // ===== RESIZABLE BOTTOM SUMMARY PANEL =====
 const panel = document.getElementById("bottomSummary");
 const header = document.querySelector(".bottom-summary-header");
+const toggleBtn = document.getElementById("summaryToggleBtn");
 
 if (panel && header) {
   let isDragging = false;
   let startY = 0;
-  let startBottom = 0;
+  let startHeight = 0;
 
-  // Restore saved position
-  const savedBottom = localStorage.getItem("summaryBottom");
-  if (savedBottom !== null) {
-    panel.style.bottom = savedBottom + "px";
+  // Restore saved height
+  const savedHeight = localStorage.getItem("summaryHeight");
+  if (savedHeight) {
+    panel.style.height = savedHeight + "px";
   }
 
+  // ===== DRAG TO RESIZE =====
   header.addEventListener("mousedown", e => {
     isDragging = true;
     startY = e.clientY;
-    startBottom = parseInt(window.getComputedStyle(panel).bottom);
+    startHeight = panel.offsetHeight;
     document.body.style.userSelect = "none";
   });
 
@@ -498,12 +500,15 @@ if (panel && header) {
     if (!isDragging) return;
 
     const delta = startY - e.clientY;
-    let newBottom = startBottom + delta;
+    let newHeight = startHeight + delta;
 
-    // limit movement so it never leaves screen
-    newBottom = Math.max(-220, Math.min(window.innerHeight - 100, newBottom));
+    // Limits
+    const minHeight = 40;                 // collapsed header size
+    const maxHeight = window.innerHeight - 100;
 
-    panel.style.bottom = newBottom + "px";
+    newHeight = Math.max(minHeight, Math.min(maxHeight, newHeight));
+
+    panel.style.height = newHeight + "px";
   });
 
   document.addEventListener("mouseup", () => {
@@ -512,12 +517,25 @@ if (panel && header) {
     isDragging = false;
     document.body.style.userSelect = "";
 
-    // save position
-    localStorage.setItem(
-      "summaryBottom",
-      parseInt(window.getComputedStyle(panel).bottom)
-    );
+    // Save height
+    localStorage.setItem("summaryHeight", panel.offsetHeight);
   });
+
+  // ===== COLLAPSE TOGGLE =====
+  if (toggleBtn) {
+    toggleBtn.onclick = () => {
+      panel.classList.toggle("collapsed");
+
+      if (panel.classList.contains("collapsed")) {
+        panel.style.height = "40px";
+        toggleBtn.textContent = "▲";
+      } else {
+        const restored = localStorage.getItem("summaryHeight") || 250;
+        panel.style.height = restored + "px";
+        toggleBtn.textContent = "▼";
+      }
+    };
+  }
 }
 
     
