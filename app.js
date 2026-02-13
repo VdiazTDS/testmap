@@ -387,14 +387,14 @@ async function loadSummaryFor(routeFileName) {
   const normalizedRoute = normalizeName(routeFileName);
 
   const summary = data.find(f => {
-  const lower = f.name.toLowerCase();
+    const lower = f.name.toLowerCase();
+    const normalizedSummary = normalizeName(f.name);
 
-  return (
-    lower.includes("routesummary") ||
-    lower.includes("route summary")
-  ) && normalizeName(f.name) === normalizedRoute;
-});
-
+    return (
+      lower.includes("routesummary") ||
+      lower.includes("route summary")
+    ) && normalizedSummary === normalizedRoute;
+  });
 
   if (!summary) {
     document.getElementById("routeSummary").textContent = "No summary available";
@@ -409,6 +409,7 @@ async function loadSummaryFor(routeFileName) {
 
   showRouteSummary(rows);
 }
+
 
 
 // ================= START APP =================
