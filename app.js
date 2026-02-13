@@ -425,6 +425,17 @@ showRouteSummary(rows, ws);
 
 
 // ================= START APP =================
+// ===== TOGGLE BOTTOM SUMMARY =====
+function toggleSummary() {
+  const panel = document.getElementById("bottomSummary");
+  const btn = document.getElementById("summaryToggleBtn");
+
+  panel.classList.toggle("collapsed");
+
+  // flip arrow direction
+  btn.textContent = panel.classList.contains("collapsed") ? "▲" : "▼";
+}
+
 function initApp() {
 
   // ===== BASE MAP DROPDOWN =====
@@ -465,16 +476,6 @@ function initApp() {
   }
 //========
 
-// ===== TOGGLE BOTTOM SUMMARY =====
-function toggleSummary() {
-  const panel = document.getElementById("bottomSummary");
-  const btn = document.getElementById("summaryToggleBtn");
-
-  panel.classList.toggle("collapsed");
-
-  // flip arrow direction
-  btn.textContent = panel.classList.contains("collapsed") ? "▲" : "▼";
-}
 
   
   // ===== INITIAL DATA LOAD =====
