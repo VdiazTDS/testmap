@@ -463,10 +463,7 @@ function initApp() {
     });
   }
 //========
-//close summary panel
-document.getElementById("closeSummary").onclick = () => {
-  document.getElementById("summaryPanel").classList.add("hidden");
-};
+
 // ===== TOGGLE BOTTOM SUMMARY =====
 function toggleSummary() {
   const panel = document.getElementById("bottomSummary");
