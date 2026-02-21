@@ -400,11 +400,16 @@ function getSymbol(key) {
 function getMarkerPixelSize() {
   const z = map.getZoom();
 
-  const baseZoom = 14;
-  const baseSize = 6;
+  const steps = [
+    [5, 0.2],
+    [7, 1],
+    [9, 1.5],
+    [11, 2.5],
+    [14, 4],
+    [Infinity, 6]
+  ];
 
-  const scale = Math.pow(2, (z - baseZoom) * 1.4);
-  return Math.max(0.15, baseSize * scale);
+  return steps.find(([max]) => z <= max)[1];
 }
 
 
