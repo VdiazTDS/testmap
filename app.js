@@ -400,14 +400,12 @@ function getSymbol(key) {
 function getMarkerPixelSize() {
   const z = map.getZoom();
 
-  if (z <= 5) return 0.2;   // extremely small when fully zoomed out
-  if (z <= 7) return 1;
-  if (z <= 9) return 1.5;
-  if (z <= 11) return 2.5;
-  if (z <= 14) return 4;
-  return 6;                 // normal size when zoomed in
-}
+  const baseZoom = 14;
+  const baseSize = 6;
 
+  const scale = Math.pow(2, (z - baseZoom) * 1.4);
+  return Math.max(0.15, baseSize * scale);
+}
 
 
 
