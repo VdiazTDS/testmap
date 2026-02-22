@@ -1994,6 +1994,18 @@ function searchMapByAddress() {
 
   resultsPanel.classList.remove("hidden");
 }
+  // Hook up search button + Enter key
+if (searchBtn) {
+  searchBtn.addEventListener("click", searchMapByAddress);
+}
+
+if (searchInput) {
+  searchInput.addEventListener("keydown", function(e) {
+    if (e.key === "Enter") {
+      searchMapByAddress();
+    }
+  });
+}
 ////////////////central save function
 async function saveWorkbookToCloud() {
 
