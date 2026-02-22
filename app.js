@@ -1908,6 +1908,72 @@ if (streetToggle) {
     map.fire("zoomend");
   });
 }
+  }
+////////////////////////////////////////////////////////////////////
+// 🔍 MAP ADDRESS SEARCH (PASTE RIGHT BELOW STREET TOGGLE)
+////////////////////////////////////////////////////////////////////
+
+const searchInput = document.getElementById("mapSearchInput");
+const searchBtn   = document.getElementById("mapSearchBtn");
+
+function searchMapByAddress() {
+
+  if (!searchInput) return;
+
+  const query = searchInput.value.trim().toLowerCase();
+  if (!query) return;
+
+  let matches = [];
+
+  Object.values(routeDayGroups).forEach(group => {
+
+    group.layers.forEach(marker => {
+
+      const row = marker._rowRef;
+      if (!row) return;
+
+      const address = [
+        row["CSADR#"] || "",
+        row["CSSDIR"] || "",
+        row["CSSTRT"] || "",
+        row["CSSFUX"] || ""
+      ].join(" ").toLowerCase();
+
+      if (address.includes(query)) {
+        matches.push(marker);
+      }
+
+    });
+
+  });
+
+  if (!matches.length) {
+    alert("No matching addresses found.");
+    return;
+  }
+
+  matches.forEach(marker => {
+    marker.setStyle?.({
+      color: "#ffff00",
+      fillColor: "#ffff00",
+      fillOpacity: 1
+    });
+  });
+
+  const group = L.featureGroup(matches);
+  map.fitBounds(group.getBounds(), { padding: [50, 50] });
+
+  alert(matches.length + " match(es) found.");
+}
+
+// Hook up button + Enter key
+if (searchBtn) searchBtn.onclick = searchMapByAddress;
+
+if (searchInput) {
+  searchInput.addEventListener("keypress", function(e) {
+    if (e.key === "Enter") searchMapByAddress();
+  });
+}
 ////////////////central save function
 async function saveWorkbookToCloud() {
 
