@@ -60,7 +60,13 @@
   
 <button id="toggleSidebarBtn" class="sidebar-toggle">❮</button>
   <aside class="sidebar">
-
+<div id="searchResultsPanel" class="search-results hidden">
+  <div class="search-results-header">
+    Search Results
+    <button id="clearSearchResults">Clear</button>
+  </div>
+  <div id="searchResultsList"></div>
+</div>
     <div id="dropZone">📄 Drag & drop Excel file or click to upload</div>
     <input type="file" id="fileInput" accept=".xlsx,.xls,.csv" hidden>
     <!-- NEW: Saved files -->
