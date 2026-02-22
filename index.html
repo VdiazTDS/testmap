@@ -65,10 +65,10 @@
     <input type="file" id="fileInput" accept=".xlsx,.xls,.csv" hidden>
     <!-- NEW: Saved files -->
     <div class="filter-group">
-      <strong>Saved Excel Files</strong>
-      <ul id="savedFiles"></ul>
-    </div>
-
+  <button id="openFileManagerBtn" class="primary-btn file-manager-btn">
+    📁 File Manager
+  </button>
+</div>
       <select id="baseMapSelect">
       <option value="streets">Streets</option>
       <option value="satellite">Satellite</option>
@@ -246,6 +246,18 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="https://unpkg.com/leaflet-pip@1.1.0/leaflet-pip.min.js"></script>
+  <!-- FILE MANAGER MODAL -->
+<div id="fileManagerModal" class="modal">
+  <div class="modal-content">
+    <h3>Saved Excel Files</h3>
+
+    <ul id="savedFiles"></ul>
+
+    <div class="modal-actions">
+      <button id="closeFileManager">Close</button>
+    </div>
+  </div>
+</div>
 <div id="downloadConfirmModal" class="modal">
   <div class="modal-content">
     <h3>Download Excel File</h3>
