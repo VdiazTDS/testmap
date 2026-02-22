@@ -284,6 +284,15 @@ const baseMaps = {
   satellite: L.tileLayer(
     "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
   )
+  // ===== SATELLITE STREET NAME OVERLAY (LIGHTWEIGHT) =====
+const satelliteLabelsLayer = L.tileLayer(
+  "https://tiles.stadiamaps.com/tiles/alidade_smooth_labels/{z}/{x}/{y}{r}.png",
+  {
+    maxZoom: 20,
+    opacity: window.innerWidth <= 900 ? 0.7 : 0.9,
+    updateWhenIdle: true,
+    keepBuffer: 2
+  }
 };
 //======
 
@@ -362,7 +371,14 @@ baseMaps.streets.addTo(map);
 // Dropdown to switch map type
 document.getElementById("baseMapSelect").addEventListener("change", e => {
   Object.values(baseMaps).forEach(l => map.removeLayer(l));
-  baseMaps[e.target.value].addTo(map);
+  map.removeLayer(satelliteLabelsLayer);
+
+  const selected = e.target.value;
+  baseMaps[selected].addTo(map);
+
+  if (selected === "satellite" && map.getZoom() >= 15) {
+    satelliteLabelsLayer.addTo(map);
+  }
 });
 
 
@@ -1401,12 +1417,19 @@ baseMaps.streets.addTo(map);
   
   // ===== BASE MAP DROPDOWN =====
   const baseSelect = document.getElementById("baseMapSelect");
-  if (baseSelect) {
-    baseSelect.addEventListener("change", e => {
-      Object.values(baseMaps).forEach(l => map.removeLayer(l));
-      baseMaps[e.target.value].addTo(map);
-    });
-  }
+if (baseSelect) {
+  baseSelect.addEventListener("change", e => {
+    Object.values(baseMaps).forEach(l => map.removeLayer(l));
+    map.removeLayer(satelliteLabelsLayer);
+
+    const selected = e.target.value;
+    baseMaps[selected].addTo(map);
+
+    if (selected === "satellite" && map.getZoom() >= 15) {
+      satelliteLabelsLayer.addTo(map);
+    }
+  });
+}
 
   // ===== SIDEBAR TOGGLE (DESKTOP) =====
   const toggleSidebarBtn = document.getElementById("toggleSidebarBtn");
@@ -1726,6 +1749,20 @@ map.on("zoomend", () => {
   const newSize = getMarkerPixelSize();
   const currentZoom = map.getZoom();
   const maxZoom = map.getMaxZoom();
+
+// ===== AUTO TOGGLE SATELLITE STREET NAMES =====
+const currentBase = document.getElementById("baseMapSelect")?.value;
+
+if (currentBase === "satellite") {
+  if (map.getZoom() >= 15) {
+    map.addLayer(satelliteLabelsLayer);
+  } else {
+    map.removeLayer(satelliteLabelsLayer);
+  }
+} else {
+  map.removeLayer(satelliteLabelsLayer);
+}
+
 
   Object.values(routeDayGroups).forEach(group => {
     group.layers.forEach(layer => {
