@@ -400,14 +400,17 @@ function getSymbol(key) {
 function getMarkerPixelSize() {
   const z = map.getZoom();
 
+  function getMarkerPixelSize() {
+  const z = map.getZoom();
+
   const steps = [
-    [5, 0.08],     // tiny when fully zoomed out
-    [7, 0.25],
-    [9, 0.6],
-    [11, 1.2],
-    [13, 2.2],
-    [15, 3.8],
-    [Infinity, 6]  // normal size when zoomed in
+    [5, 0.03],     // almost invisible when fully zoomed out
+    [7, 0.08],
+    [9, 0.2],
+    [11, 0.6],
+    [13, 1.5],
+    [15, 3.5],
+    [Infinity, 6]
   ];
 
   return steps.find(([max]) => z <= max)[1];
