@@ -2119,7 +2119,35 @@ async function undoDelivered() {
     alert("No Delivered stops inside selection.");
     return;
   }
+// ================= LOADING OVERLAY =================
+function showLoading(message) {
+  const loader = document.getElementById("loadingOverlay");
+  if (!loader) return;
 
+  loader.style.display = "flex";
+
+  const text = loader.querySelector(".loading-text");
+  if (text) {
+    text.textContent = message || "Loading...";
+  }
+}
+
+function hideLoading(message) {
+  const loader = document.getElementById("loadingOverlay");
+  if (!loader) return;
+
+  const text = loader.querySelector(".loading-text");
+
+  if (message && text) {
+    text.textContent = message;
+
+    setTimeout(() => {
+      loader.style.display = "none";
+    }, 900);
+  } else {
+    loader.style.display = "none";
+  }
+}
   // Rewrite Excel sheet
  const saved = await saveWorkbookToCloud();
 
