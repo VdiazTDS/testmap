@@ -1795,3 +1795,7 @@ body.sun-mode .filter-header {
   background: #00c853;
   color: black;
 }
+
+.search-results {
+  margin-bottom: 10px;
+}
