@@ -2124,7 +2124,7 @@ function showLoading(message) {
   const loader = document.getElementById("loadingOverlay");
   if (!loader) return;
 
-  loader.style.display = "flex";
+  loader.classList.remove("hidden");
 
   const text = loader.querySelector(".loading-text");
   if (text) {
@@ -2142,10 +2142,10 @@ function hideLoading(message) {
     text.textContent = message;
 
     setTimeout(() => {
-      loader.style.display = "none";
+      loader.classList.add("hidden");
     }, 900);
   } else {
-    loader.style.display = "none";
+    loader.classList.add("hidden");
   }
 }
   // Rewrite Excel sheet
