@@ -1663,3 +1663,25 @@ body.sun-mode .filter-header {
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
+
+
+
+/* ===== Saved Files Buttons Improvements ===== */
+
+.file-list button {
+  padding: 10px 16px;          /* Bigger click area */
+  margin: 6px 6px 6px 0;       /* Space between buttons */
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+}
+
+.file-list button:hover {
+  transform: translateY(-2px); /* Slight lift */
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+
+.file-list button:active {
+  transform: scale(0.97);
+}
