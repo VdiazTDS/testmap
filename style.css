@@ -901,7 +901,7 @@ header {
 @media (max-width: 900px) {
 
   .sidebar {
-    padding-top: 25px;   /* adjust to 15px–30px if you want more/less space */
+    padding-top: 125px;   /* adjust to 15px–30px if you want more/less space */
   }
 
 }
