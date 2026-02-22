@@ -2143,8 +2143,8 @@ buildRouteDayLayerControls();
 alert(`${undoCount} stop(s) restored.`);
 
 }
-  // ================= LOADING OVERLAY =================
-function showLoading(message) {
+ // ================= LOADING OVERLAY =================
+window.showLoading = function(message) {
   const loader = document.getElementById("loadingOverlay");
   if (!loader) return;
 
@@ -2154,9 +2154,9 @@ function showLoading(message) {
   if (text) {
     text.textContent = message || "Loading...";
   }
-}
+};
 
-function hideLoading(message) {
+window.hideLoading = function(message) {
   const loader = document.getElementById("loadingOverlay");
   if (!loader) return;
 
@@ -2164,14 +2164,13 @@ function hideLoading(message) {
 
   if (message && text) {
     text.textContent = message;
-
     setTimeout(() => {
       loader.classList.add("hidden");
     }, 900);
   } else {
     loader.classList.add("hidden");
   }
-}
+};
 //////
   
 // ===== DAYS COLLAPSIBLE =====
