@@ -298,11 +298,11 @@ const baseMaps = {
 };
 // ===== SATELLITE STREET NAME OVERLAY (LIGHTWEIGHT) =====
 const satelliteLabelsLayer = L.tileLayer(
-  "https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}",
+  "https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Transportation/MapServer/tile/{z}/{y}/{x}",
   {
     maxZoom: 20,
     maxNativeZoom: 19,
-    opacity: 0.9
+    opacity: 1
   }
 );
 
