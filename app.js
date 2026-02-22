@@ -299,16 +299,13 @@ const baseMaps = {
 
 // ===== SATELLITE STREET NAME OVERLAY (LIGHTWEIGHT) =====
 const satelliteLabelsLayer = L.tileLayer(
-  "https://{s}.basemaps.cartocdn.com/voyager_only_labels/{z}/{x}/{y}{r}.png",
+  "https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}",
   {
     maxZoom: 20,
-    opacity: window.innerWidth <= 900 ? 0.7 : 0.9,
-    updateWhenIdle: true,
-    keepBuffer: 2,
-    subdomains: "abcd"
+    maxNativeZoom: 19,
+    opacity: 0.9
   }
-);
-//======
+);==
 
 // ================= POLYGON SELECT =================
 
