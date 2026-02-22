@@ -218,9 +218,7 @@ header p {
     font-size: 12px;
   }
 
-  .sidebar {
-    max-height: 60vh;
-  }
+  
 }
 
 .sidebar-toggle {
