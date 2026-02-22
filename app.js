@@ -1923,6 +1923,10 @@ function searchMapByAddress() {
   const query = searchInput.value.trim().toLowerCase();
   if (!query) return;
 
+  const resultsPanel = document.getElementById("searchResultsPanel");
+  const resultsList  = document.getElementById("searchResultsList");
+
+  resultsList.innerHTML = "";
   let matches = [];
 
   Object.values(routeDayGroups).forEach(group => {
@@ -1940,7 +1944,7 @@ function searchMapByAddress() {
       ].join(" ").toLowerCase();
 
       if (address.includes(query)) {
-        matches.push(marker);
+        matches.push({ marker, row });
       }
 
     });
@@ -1952,27 +1956,43 @@ function searchMapByAddress() {
     return;
   }
 
-  matches.forEach(marker => {
-    marker.setStyle?.({
-      color: "#ffff00",
-      fillColor: "#ffff00",
-      fillOpacity: 1
-    });
+  matches.forEach((item, index) => {
+
+    const div = document.createElement("div");
+    div.className = "search-result-item";
+
+    const displayAddress = [
+      item.row["CSADR#"] || "",
+      item.row["CSSDIR"] || "",
+      item.row["CSSTRT"] || "",
+      item.row["CSSFUX"] || ""
+    ].join(" ");
+
+    div.textContent = displayAddress;
+
+    div.onclick = () => {
+
+      // Remove previous selected styling
+      document.querySelectorAll(".search-result-item")
+        .forEach(el => el.classList.remove("selected"));
+
+      div.classList.add("selected");
+
+      map.setView(item.marker.getLatLng(), 18);
+
+      item.marker.setStyle?.({
+        color: "#ffff00",
+        fillColor: "#ffff00",
+        fillOpacity: 1
+      });
+
+    };
+
+    resultsList.appendChild(div);
+
   });
 
-  const group = L.featureGroup(matches);
-  map.fitBounds(group.getBounds(), { padding: [50, 50] });
-
-  alert(matches.length + " match(es) found.");
-}
-
-// Hook up button + Enter key
-if (searchBtn) searchBtn.onclick = searchMapByAddress;
-
-if (searchInput) {
-  searchInput.addEventListener("keypress", function(e) {
-    if (e.key === "Enter") searchMapByAddress();
-  });
+  resultsPanel.classList.remove("hidden");
 }
 ////////////////central save function
 async function saveWorkbookToCloud() {
