@@ -288,12 +288,13 @@ const baseMaps = {
 
 // ===== SATELLITE STREET NAME OVERLAY (LIGHTWEIGHT) =====
 const satelliteLabelsLayer = L.tileLayer(
-  "https://tiles.stadiamaps.com/tiles/alidade_smooth_labels/{z}/{x}/{y}{r}.png",
+  "https://{s}.basemaps.cartocdn.com/voyager_only_labels/{z}/{x}/{y}{r}.png",
   {
     maxZoom: 20,
     opacity: window.innerWidth <= 900 ? 0.7 : 0.9,
     updateWhenIdle: true,
-    keepBuffer: 2
+    keepBuffer: 2,
+    subdomains: "abcd"
   }
 );
 //======
