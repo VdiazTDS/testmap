@@ -14,7 +14,7 @@ window._currentRows = null;
 window._currentWorkbook = null;
 window._currentFilePath = null;
 
-window.streetLabelsEnabled = true;
+window.streetLabelsEnabled = false;
 
 //======
 // 🔐 Delete protection password
@@ -1872,10 +1872,25 @@ window.addEventListener("resize", placeLocateButton);
 
 
 // ===== STREET LABEL TOGGLE =====
-document.getElementById("streetLabelToggle").addEventListener("change", (e) => {
-  window.streetLabelsEnabled = e.target.checked;
-  map.fire("zoomend"); // refresh labels immediately
-});
+const streetToggle = document.getElementById("streetLabelToggle");
+
+if (streetToggle) {
+
+  // Set initial state based on checkbox
+  window.streetLabelsEnabled = streetToggle.checked;
+
+  // Force labels to respect initial state
+  map.whenReady(() => {
+    map.fire("zoomend");
+  });
+
+  streetToggle.addEventListener("change", (e) => {
+    window.streetLabelsEnabled = e.target.checked;
+
+    // Immediately refresh labels
+    map.fire("zoomend");
+  });
+}
 ////////////////central save function
 async function saveWorkbookToCloud() {
 
