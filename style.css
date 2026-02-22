@@ -1,1734 +1,2233 @@
-/* ================= GLOBAL ================= */
-body {
-  font-family: 'Roboto', sans-serif;
-  margin: 0;
-  background: #121212;
-  color: #eee;
+window.addEventListener("error", e => {
+  console.error("JS ERROR:", e.message, "at line", e.lineno);
+});
+
+let layerVisibilityState = {};
+
+// ================= SUPABASE CONFIG =================
+// Connection info for cloud file storage
+const SUPABASE_URL = "https://lffazhbwvorwxineklsy.supabase.co";
+const SUPABASE_KEY = "sb_publishable_Lfh2zlIiTSMB0U-Fe5o6Jg_mJ1qkznh";
+const BUCKET = "excel-files";
+// ===== CURRENT EXCEL STATE =====
+window._currentRows = null;
+window._currentWorkbook = null;
+window._currentFilePath = null;
+
+window.streetLabelsEnabled = false;
+
+//======
+// 🔐 Delete protection password
+const DELETE_PASSWORD = "Austin1";  // ← change to whatever you want
+
+
+document.addEventListener("DOMContentLoaded", () => {
+  initApp();
+  document.addEventListener("DOMContentLoaded", initApp);
+// ================= SUN MODE TOGGLE =================
+
+const sunToggle = document.getElementById("sunModeToggle");
+
+// Load saved preference
+if (localStorage.getItem("sunMode") === "on") {
+  document.body.classList.add("sun-mode");
+  if (sunToggle) sunToggle.checked = true;
 }
 
-
-/* ================= HEADER ================= */
-header {
-  text-align: center;
-  padding: 10px;
-  border-bottom: 1px solid #333;
+if (sunToggle) {
+  sunToggle.addEventListener("change", () => {
+    if (sunToggle.checked) {
+      document.body.classList.add("sun-mode");
+      localStorage.setItem("sunMode", "on");
+    } else {
+      document.body.classList.remove("sun-mode");
+      localStorage.setItem("sunMode", "off");
+    }
+  });
 }
 
-header h1 {
-  font-size: 20px;
-  font-weight: bold;
-  color: white;
-  margin: 0;
-}
+  });
+/* ⭐ Ensures mobile buttons move AFTER full page load */
+window.addEventListener("load", placeLocateButton);
 
-header p {
-  margin: 2px 0 5px;
-  font-size: 14px;
-  color: #bbb;
-}
-
-
-/* ================= LAYOUT ================= */
-.app-container {
-  display: flex;
-  height: calc(100vh - 70px);
-}
-
-
-/* ================= SIDEBAR ================= */
-.sidebar {
-  width: 320px;
-  background: #1a1a1a;
-  padding: 10px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  overflow-y: auto;
-  border-right: 1px solid #333;
-
-  color: #eee; /* 🔥 ADD THIS LINE */
-}
-
-.sidebar strong {
-  color: #ffffff;
-}
-
-
-/* ================= UPLOAD BOX ================= */
-#dropZone {
-  background: #1e1e1e;
-  border: 2px dashed #555;
-  padding: 10px;
-  border-radius: 8px;
-  cursor: pointer;
-  text-align: center;
-  transition: border-color 0.2s, background 0.2s;
-}
-
-#dropZone:hover {
-  border-color: #42a5f5;
-  background: #222;
-}
-
-
-/* ================= FILTER BLOCKS ================= */
-.filter-group {
-  background: #1e1e1e;
-  padding: 8px;
-  border-radius: 8px;
-  font-size: 13px;
-}
-
-.filter-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 4px;
-}
-
-
-/* ================= VERTICAL CHECKBOX LISTS ================= */
-#routeCheckboxes,
-#dayCheckboxes {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  margin-top: 4px;
-  max-height: 180px;
-  overflow-y: auto;
-}
-
-#routeCheckboxes label,
-#dayCheckboxes label {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 13px;
-  cursor: pointer;
-}
-
-
-/* ================= BUTTONS ================= */
-.mini-btn {
-  background: #333;
-  color: #eee;
-  border: none;
-  border-radius: 5px;
-  padding: 2px 6px;
-  font-size: 11px;
-  cursor: pointer;
-  transition: background 0.2s, color 0.2s;
-}
-
-.mini-btn:hover {
-  background: #42a5f5;
-  color: #000;
-}
-
-
-
-#resetMapBtn:hover {
-  background: #64b5f6;
-}
-
-
-/* ================= SAVED FILES LIST ================= */
-#savedFiles {
-  list-style: none;
-  padding-left: 0;
-  margin: 0;
-  font-size: 13px;
-}
-
-#savedFiles li {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  margin-bottom: 4px;
-}
-
-#savedFiles button {
-  background: #333;
-  color: #eee;
-  border: none;
-  border-radius: 5px;
-  padding: 2px 6px;
-  font-size: 11px;
-  cursor: pointer;
-}
-
-#savedFiles button:hover {
-  background: #42a5f5;
-  color: #000;
-}
-
-
-/* ================= STATS ================= */
-#statsList {
-  list-style: none;
-  padding-left: 0;
-  margin: 0;
-  font-size: 13px;
-}
-
-
-/* ================= MAP ================= */
-.map-container {
-  flex: 1;
-}
-
-#map {
-  width: 100%;
-  height: 100%;
-}
-
-/* ===== Modern mobile menu button ===== */
-#mobileMenuBtn {
-  display: none;
-
-  position: relative;
-  z-index: 5000;   /* VERY high so nothing can cover it */
-
-  margin-top: 6px;
-  background: #2a2a2a;
-  border: 1px solid #444;
-  color: #fff;
-  border-radius: 8px;
-  padding: 8px 14px;
-  font-size: 18px;
-  cursor: pointer;
-}
-
-/* SHOW ONLY ON REAL MOBILE WIDTHS */
-@media (max-width: 900px) {
-  #mobileMenuBtn {
-    display: inline-block;
-  }
-}
-
-
-
-/* Very small phones */
-@media (max-width: 480px) {
-  header h1 {
-    font-size: 18px;
+// ===== USER GEOLOCATION =====
+function locateUser() {
+  if (!navigator.geolocation) {
+    console.warn("Geolocation not supported");
+    return;
   }
 
-  header p {
-    font-size: 12px;
+  navigator.geolocation.getCurrentPosition(
+    pos => {
+      const lat = pos.coords.latitude;
+      const lon = pos.coords.longitude;
+
+      // Center map on user
+      map.setView([lat, lon], 14);
+    },
+    err => {
+      console.warn("Location permission denied or unavailable");
+      map.setView([39.5, -98.35], 4);
+    },
+    {
+      enableHighAccuracy: true,
+      timeout: 10000,
+      maximumAge: 30000
+    }
+  );
+}
+
+// ===== FLOATING "CENTER ON ME" BUTTON =====
+let watchId = null;
+let userCircle = null;
+
+
+
+function startLiveTracking() {
+  if (!navigator.geolocation) {
+    alert("Geolocation is not supported on this device.");
+    return;
   }
 
-  .sidebar {
-    max-height: 60vh;
+  // Stop previous tracking
+  if (watchId !== null) {
+    navigator.geolocation.clearWatch(watchId);
   }
-}
 
-.sidebar-toggle {
-  position: fixed;            /* stay in same place on screen */
-  top: 50%;
-  left: 320px;
-  transform: translateY(-50%);
-  width: 26px;
-  height: 72px;
+// Start compass tracking first
+startHeadingTracking();
 
-  background: #2a2a2a;
-  color: #eee;
-  border: 1px solid #444;
-  border-left: none;
-  border-radius: 0 10px 10px 0;
+watchId = navigator.geolocation.watchPosition(
+  (pos) => {
+    const lat = pos.coords.latitude;
+    const lng = pos.coords.longitude;
+    const accuracy = pos.coords.accuracy;
 
-  display: flex;
-  align-items: center;
-  justify-content: center;
+    const latlng = [lat, lng];
 
-  font-size: 16px;
-  font-weight: bold;
-  cursor: pointer;
+    // ===== Heading Arrow =====
+    if (!headingMarker) {
+      headingMarker = L.marker(latlng, {
+        icon: createHeadingIcon(currentHeading),
+        interactive: false
+      }).addTo(map);
+    } else {
+      headingMarker.setLatLng(latlng);
+    }
 
-  z-index: 2000;              /* ABOVE Leaflet map */
-  touch-action: manipulation; /* allow taps */
-}
+    // Smooth follow
+    map.flyTo(latlng, Math.max(map.getZoom(), 16), { duration: 1.2 });
 
-.sidebar-toggle:hover {
-  background: #42a5f5;
-  color: #000;
-}
+   
 
-/* Move to screen edge when collapsed */
-.app-container.collapsed .sidebar-toggle {
-  left: 0;
-}
-
-/* Rotate arrow when sidebar is collapsed */
-.app-container.collapsed .sidebar-toggle {
-  transform: translateY(-50%) rotate(180deg);
-}
-
-
-
-
-/* Collapse sidebar */
-.app-container.collapsed .sidebar {
-  width: 0;
-  padding: 0;
-  overflow: hidden;
-  border-right: none;
-}
-
-.app-container.collapsed .map-container {
-  flex: 1;
-}
-
-
-/* Smooth animation */
-.sidebar {
-  transition: width 0.25s ease, padding 0.25s ease;
-}
-
-
-/* Collapsed state */
-.app-container.collapsed .sidebar {
-  width: 0;
-  padding: 0;
-  overflow: hidden;
-  border-right: none;
-}
-
-.app-container.collapsed .map-container {
-  flex: 1;
-}
-
-/* ===== Prevent double menu buttons ===== */
-
-/* Hide floating toggle on mobile */
-@media (max-width: 900px) {
-  .sidebar-toggle {
-    display: none !important;
+    // ===== Accuracy circle =====
+    if (!userCircle) {
+      userCircle = L.circle(latlng, {
+        radius: accuracy,
+        color: "#2a93ff",
+        fillColor: "#2a93ff",
+        fillOpacity: 0.2,
+        weight: 2,
+      }).addTo(map);
+    } else {
+      userCircle.setLatLng(latlng);
+      userCircle.setRadius(accuracy);
+    }
+  },
+  (err) => {
+    console.error("GPS error:", err);
+    alert("Unable to get your location.");
+  },
+  {
+    enableHighAccuracy: true,
+    maximumAge: 0,
+    timeout: 10000,
   }
+);
+
 }
 
-/* Hide top mobile menu on desktop */
-@media (min-width: 901px) {
-  #mobileMenuBtn {
-    display: none !important;
+
+//===direction user is facing
+let headingMarker = null;
+let currentHeading = 0;
+
+function createHeadingIcon(angle) {
+  return L.divIcon({
+    className: "heading-icon-modern",
+    html: `
+      <div style="
+        transform: rotate(${angle}deg);
+        transition: transform 0.12s linear;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      ">
+        <svg width="36" height="36" viewBox="0 0 36 36">
+          <circle cx="18" cy="18" r="14" fill="rgba(66,165,245,0.15)" />
+          <circle cx="18" cy="18" r="10" fill="#ffffff" />
+          <path d="M18 6 L24 22 L18 19 L12 22 Z" fill="#42a5f5"/>
+        </svg>
+      </div>
+    `,
+    iconSize: [36, 36],
+    iconAnchor: [18, 18]
+  });
+}
+
+
+
+
+
+function startHeadingTracking() {
+  if (typeof DeviceOrientationEvent !== "undefined") {
+
+    if (typeof DeviceOrientationEvent.requestPermission === "function") {
+      DeviceOrientationEvent.requestPermission()
+        .then(permissionState => {
+          if (permissionState === "granted") {
+            window.addEventListener("deviceorientation", updateHeading);
+          }
+        })
+        .catch(console.error);
+    } else {
+      window.addEventListener("deviceorientation", updateHeading);
+    }
+
   }
 }
 
 
 
 
+function updateHeading(event) {
+  if (event.alpha === null) return;
 
+  currentHeading = 360 - event.alpha; // Convert to compass style
 
-
-
-
-
-/* toggle button */
-.bottom-summary-header button {
-  background: none;
-  border: none;
-  color: white;
-  font-size: 16px;
-  cursor: pointer;
-}
-
-/* scrollable content */
-.bottom-summary-content {
-  flex: 1;
-  overflow: auto;
-  padding: 10px;
-}
-
-/* summary table styling */
-.bottom-summary-content table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 13px;
-}
-
-.bottom-summary-content th,
-.bottom-summary-content td {
-  border: 1px solid #444;
-  padding: 6px;
-  text-align: left;
-}
-
-.bottom-summary-content th {
-  background: #333;
-}
-
-
-
-
-
-/* Keep title perfectly centered */
-.summary-title {
-  text-align: center;
-}
-
-
-
-
-
-/* ===== Primary app button style (shared) ===== */
-.primary-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-
-  background: #42a5f5;          /* same blue as Reset Map */
-  color: #000;
-
-  border: none;
-  border-radius: 8px;
-
-  padding: 6px 12px;
-  font-size: 13px;
-  font-weight: 600;
-
-  cursor: pointer;
-  transition: all 0.18s ease;
-
-  box-shadow: 0 2px 6px rgba(0,0,0,0.35);
-}
-
-/* Hover */
-.primary-btn:hover {
-  background: #64b5f6;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 10px rgba(0,0,0,0.45);
-}
-
-/* Click */
-.primary-btn:active {
-  transform: translateY(0);
-  box-shadow: 0 2px 5px rgba(0,0,0,0.35);
-}
-
-
-/* ===== UNDO DELIVERED BUTTON ===== */
-.undo-btn {
-  background: #e53935;   /* strong red */
-  color: #fff;
-}
-
-.undo-btn:hover {
-  background: #c62828;
-}
-
-
-/* ===== FINAL HEADER LAYOUT ===== */
-/* ===== FINAL BOTTOM SUMMARY HEADER ===== */
-.bottom-summary-header {
-  height: 40px;
-  background: #2a2a2a;
-
-  display: flex;
-  align-items: center;
-  gap: 10px;
-
-  padding: 0 16px;
-  border-bottom: 1px solid #444;
-}
-
-/*  while buttons stay left */
-.summary-title {
-  margin-left: auto;
-  margin-right: auto;
-  font-weight: 600;
-  color: #fff;
-}
-
-/* Ensure arrow never jumps right */
-.collapse-btn {
-  order: 2;        /* keeps it left */
-}
-
-
-
-
-
-
-
-
-/* RIGHT SIDEBAR CONTAINER */
-
-
-/* ===== RIGHT SIDEBAR ===== */
-
-/* Container */
-#selectionBox {
-  position: absolute;
-  right: 0;
-  top: 120px;
-  width: 220px;
-
-  background: #1e1e1e;
-  border-left: 1px solid #333;
-
-  padding: 12px 16px;
-
-  transition: transform 0.25s ease;
-  z-index: 500;
-}
-
-/* Collapsed state — slide fully off screen */
-#selectionBox.collapsed {
-  transform: translateX(100%);
-}
-
-/* Toggle button (attached to sidebar edge) */
-.sidebar-toggle-right {
-  position: absolute;
-  left: -28px;          /* keeps it glued to sidebar */
-  top: 12px;
-
-  width: 28px;
-  height: 28px;
-
-  border-radius: 6px 0 0 6px;
-  border: 1px solid #333;
-
-  background: #2b7cff;
-  color: #fff;
-
-  cursor: pointer;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  z-index: 600;
-}
-
-/* When sidebar is collapsed, keep toggle visible at screen edge */
-#selectionBox.collapsed .sidebar-toggle-right {
-  left: -28px;
-}
-
-
-/* ===== RESIZE HINT BAR ===== */
-.resize-hint {
-  position: absolute;
-  top: -10px;
-  left: 50%;
-  transform: translateX(-50%);
-
-  font-size: 11px;
-  color: #888;
-  background: #1e1e1e;
-
-  padding: 2px 8px;
-  border-radius: 6px;
-
-  pointer-events: none;
-  opacity: 0.85;
-}
-
-/* Thin grab line like native apps */
-.bottom-summary-header::before {
-  content: "";
-  position: absolute;
-  top: 4px;
-  left: 50%;
-  transform: translateX(-50%);
-
-  width: 40px;
-  height: 4px;
-  border-radius: 3px;
-  background: #555;
-}
-
-/* Cursor change = huge UX signal */
-.bottom-summary-header {
-  cursor: ns-resize;
-  position: relative;
-}
-
-/* Route list layout */
-.route-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 6px;
-  font-size: 13px;
-  margin: 2px 0;
-}
-
-/* Small symbol preview */
-.route-icon {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-
-
-/* =========================================================
-   FINAL BOTTOM SUMMARY PANEL — SINGLE SOURCE OF TRUTH
-   ========================================================= */
-
-/* =========================================================
-   RESPONSIVE BOTTOM ROUTE SUMMARY (SIDEBAR-AWARE)
-   ========================================================= */
-#bottomSummary {
-  position: fixed;
-  bottom: 0;
-
-  /* Desktop sidebar offset */
-  left: 320px;
-  right: 0;
-
-  height: 250px;
-  background: #1e1e1e;
-  border-top: 2px solid #333;
-
-  display: flex;
-  flex-direction: column;
-
-  z-index: 400;
-
-  /* Smooth movement when sidebar toggles */
-  transition:
-    height 0.2s ease,
-    left 0.25s ease,
-    width 0.25s ease;
-}
-
-
-
-/* ===== MOBILE FIX FOR ROUTE SUMMARY POSITION ===== */
-@media (max-width: 900px) {
-
-  #bottomSummary {
-    left: 0;              /* remove desktop offset */
-    right: 0;
-    bottom: 0;
-
-    width: 100%;
-    max-height: 75vh;
-
-    border-radius: 16px 16px 0 0;
-    box-shadow: 0 -4px 20px rgba(0,0,0,0.5);
-
-    z-index: 1200;
-  }
-
-  /* Keep selection panel above summary */
-  #selectionBox {
-    bottom: calc(75vh + 12px);
+  if (headingMarker) {
+    headingMarker.setIcon(createHeadingIcon(currentHeading));
   }
 }
 
 
-/* ===== When LEFT SIDEBAR is collapsed ===== */
-.app-container.collapsed ~ #bottomSummary {
-  left: 0;
-}
 
-/* ===== Collapsed height only ===== */
-#bottomSummary.collapsed {
-  height: 40px;
-}
+// ===== HARD REFRESH BUTTON (SAFE + NO CACHE) =====
+const hardRefreshBtn = document.getElementById("hardRefreshBtn");
 
-/* Hide table when collapsed */
-#bottomSummary.collapsed .bottom-summary-content {
-  display: none;
-}
+if (hardRefreshBtn) {
+  let refreshArmed = false;
 
-/* =========================================================
-   HEADER (drag + title)
-   ========================================================= */
+  hardRefreshBtn.addEventListener("click", () => {
 
-.bottom-summary-header {
-  height: 40px;
-  background: #2a2a2a;
-  border-bottom: 1px solid #444;
+    // Mobile double-tap protection
+    if (window.innerWidth <= 900) {
+      if (!refreshArmed) {
+        refreshArmed = true;
+        hardRefreshBtn.textContent = "Tap again to refresh";
 
-  display: flex;
-  align-items: center;
-  padding: 0 16px;
+        setTimeout(() => {
+          refreshArmed = false;
+          hardRefreshBtn.textContent = "Refresh";
+        }, 2000);
 
-  cursor: ns-resize;
-  position: relative;
-}
+        return;
+      }
+    }
 
-/* Center title perfectly */
-.summary-title {
-  flex: 1;
-  text-align: center;
-  font-weight: 600;
-  color: #fff;
-}
+    // Clear cache storage if supported
+    if ("caches" in window) {
+      caches.keys().then(names => names.forEach(n => caches.delete(n)));
+    }
 
-/* =========================================================
-   CONTENT AREA
-   ========================================================= */
-
-.bottom-summary-content {
-  flex: 1;
-  overflow: auto;
-  padding: 10px;
-}
-
-/* Table styling */
-.bottom-summary-content table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 13px;
-}
-
-.bottom-summary-content th,
-.bottom-summary-content td {
-  border: 1px solid #444;
-  padding: 6px;
-  text-align: left;
-}
-
-.bottom-summary-content th {
-  background: #333;
+    // True hard reload (no cache)
+    window.location.href = window.location.pathname + "?v=" + Date.now();
+  });
 }
 
 
-/* Route+Day layer list */
-.route-day-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  font-size: 13px;
-  margin: 4px 0;
+//======
+
+
+// Create Supabase client
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+
+// ================= FILE NAME MATCHING =================
+// Makes route files and route summary files match even if
+// spacing, punctuation, or "RouteSummary" text is different.
+function normalizeName(name) {
+  return name
+    .toLowerCase()
+    .replace(".xlsx", "")
+    .replace("route summary", "")   // handles "Route Summary"
+    .replace("routesummary", "")    // handles "RouteSummary"
+    .replace(/[_\s.-]/g, "")        // ignore spaces, _, ., -
+    .trim();
 }
 
-/* Left side: checkbox + label */
-.route-day-left {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
 
-/* Symbol preview matching map marker */
-.route-day-symbol {
-  width: 14px;
-  height: 14px;
-  flex-shrink: 0;
-}
+// ================= MAP SETUP =================
+// Create Leaflet map
+const map = L.map("map").setView([0, 0], 2);
+// Shared Canvas renderer for high-performance drawing
+const canvasRenderer = L.canvas({ padding: 0.5 });
 
-/* ===== MOBILE SIDEBAR AS SLIDE-OVER DRAWER ===== */
-/* ===== MOBILE SIDEBAR FIX ===== */
 
-@media (max-width: 900px) {
+// ===== BASE MAP LAYERS =====
+const baseMaps = {
+  streets: L.tileLayer(
+    "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+    {
+      maxZoom: 19,
+      maxNativeZoom: 19
+    }
+  ),
 
-  .mini-btn,
-  .primary-btn,
-  #routeCheckboxes label,
-  #dayCheckboxes label {
-    min-height: 44px;      /* Apple/Google touch standard */
-    font-size: 15px;
+  satellite: L.tileLayer(
+    "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+    {
+      maxZoom: 20,
+      maxNativeZoom: 19
+    }
+  )
+};
+// ===== SATELLITE STREET NAME OVERLAY (LIGHTWEIGHT) =====
+const satelliteLabelsLayer = L.tileLayer(
+  "https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Transportation/MapServer/tile/{z}/{y}/{x}",
+  {
+    maxZoom: 20,
+    maxNativeZoom: 19,
+    opacity: 1
   }
+);
 
-  input[type="checkbox"] {
-    transform: scale(1.3);
-    margin-right: 8px;
-  }
+// ================= POLYGON SELECT =================
+
+
+// when polygon created
+// ================= POLYGON SELECT =================
+let drawnLayer = new L.FeatureGroup();
+map.addLayer(drawnLayer);
+
+const drawControl = new L.Control.Draw({
+  draw: {
+    polygon: true,
+    rectangle: true,
+    circle: false,
+    marker: false,
+    polyline: false,
+    circlemarker: false
+  },
+  edit: { featureGroup: drawnLayer }
+});
+
+map.addControl(drawControl);
+
+// ===== SELECTION COUNT FUNCTION (GLOBAL & CORRECT) =====
+function updateSelectionCount() {
+const polygon = drawnLayer.getLayers()[0];
+let count = 0;
+
+Object.entries(routeDayGroups).forEach(([key, group]) => {
+ group.layers.forEach(marker => {
+   const base = marker._base;
+   if (!base) return;
+
+   const latlng = L.latLng(base.lat, base.lon);
+
+   if (
+     polygon &&
+     polygon.getBounds().contains(latlng) &&
+     map.hasLayer(marker)
+   ) {
+     // highlight selected marker
+     marker.setStyle?.({ color: "#ffff00", fillColor: "#ffff00" });
+
+     count++; // ✅ only counting here
+   } else {
+     // restore original color
+     const sym = symbolMap[key];
+     marker.setStyle?.({ color: sym.color, fillColor: sym.color });
+   }
+ });
+});
+
+document.getElementById("selectionCount").textContent = count;
 }
 
-/* ===== MOBILE SELECTION PANEL FIX ===== */
-@media (max-width: 900px) {
 
-  /* Move selection panel ABOVE the summary instead of overlapping */
-  #selectionBox {
-    position: fixed;
-    left: 10px;
-    right: 10px;
-    bottom: 260px;   /* sits just above route summary */
-    top: auto;
-
-    width: auto;
-    border-radius: 14px;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.5);
-
-    display: none;   /* hidden by default */
-  }
-
-  /* Visible state */
-  #selectionBox.show {
-    display: block;
-  }
-
-  /* Small floating open button */
-  #mobileSelectionBtn {
-    position: fixed;
-    right: 14px;
-    bottom: 90px;
-
-    background: #42a5f5;
-    color: #000;
-    border: none;
-    border-radius: 20px;
-    padding: 10px 14px;
-    font-size: 14px;
-    font-weight: 600;
-
-    z-index: 3000;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.4);
-  }
+// ===== COMPLETE SELECTED STOPS =====
 
 
   
-}
 
-/* ===== Fix menu button hidden by iPhone notch ===== */
-#mobileMenuBtn {
-  margin-top: calc(6px + env(safe-area-inset-top));
-}
 
-/* Also protect the header itself */
-header {
-  padding-top: calc(10px + env(safe-area-inset-top));
-}
-/* ===== MOBILE SAFE AREA (prevents notch overlap) ===== */
-header {
-  padding-top: max(10px, env(safe-area-inset-top));
-}
+// ===== WHEN POLYGON IS DRAWN =====
+map.on(L.Draw.Event.CREATED, e => {
+  drawnLayer.clearLayers();
+  drawnLayer.addLayer(e.layer);
+  updateSelectionCount();
+  updateUndoButtonState();   // 🔥 ADD THIS
+});
 
-/* Keep menu button always tappable */
-#mobileMenuBtn {
-  position: relative;
-  z-index: 4000;
-  margin-top: 4px;
-}
+// Default map
+baseMaps.streets.addTo(map);
 
-/* Prevent header from being hidden while scrolling */
-header {
-  position: sticky;
-  top: 0;
+// Dropdown to switch map type
+document.getElementById("baseMapSelect").addEventListener("change", e => {
+  Object.values(baseMaps).forEach(l => map.removeLayer(l));
+  map.removeLayer(satelliteLabelsLayer);
 
-  /* MUST be above sidebar + overlay */
-  z-index: 5000;
-}
+  const selected = e.target.value;
+  baseMaps[selected].addTo(map);
 
-/* ===== MOBILE SIDEBAR SLIDE-IN (REQUIRED FOR MENU BUTTON) ===== */
-@media (max-width: 900px) {
+  if (selected === "satellite" && map.getZoom() >= 15) {
+    satelliteLabelsLayer.addTo(map);
+  }
+});
 
- .sidebar {
-  position: fixed;
 
-  /* Always stay BELOW the real header height */
-  top: calc(70px + env(safe-area-inset-top));
+// ================= MAP SYMBOL SETTINGS =================
+const colors = ["#e74c3c","#3498db","#2ecc71","#f39c12","#9b59b6","#1abc9c"];
+const shapes = ["circle","square","triangle","diamond"];
 
-  left: 0;
-  bottom: 0;
-  width: 85%;
-  max-width: 320px;
+const symbolMap = {};        // stores symbol for each route/day combo
+const routeDayGroups = {};   // stores map markers grouped by route/day
+// ===== DELIVERED STOPS LAYER =====
 
-  transform: translateX(-100%);
-  transition: transform 0.25s ease;
 
-  z-index: 3500;
+let symbolIndex = 0;
+let globalBounds = L.latLngBounds(); // used to zoom map to all points
+
+
+// Convert day number → day name
+function dayName(n) {
+  return ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"][n-1];
 }
 
 
-  .sidebar.open {
-    transform: translateX(0);
+// Assign a unique color/shape to each route/day
+function getSymbol(key) {
+  if (!symbolMap[key]) {
+    symbolMap[key] = {
+      color: colors[symbolIndex % colors.length],
+      shape: shapes[Math.floor(symbolIndex / colors.length) % shapes.length]
+    };
+    symbolIndex++;
+  }
+  return symbolMap[key];
+}
+
+
+  function getMarkerPixelSize() {
+  const z = map.getZoom();
+
+  const steps = [
+    [5, 0.03],     // almost invisible when fully zoomed out
+    [7, 0.08],
+    [9, 0.2],
+    [11, 0.6],
+    [13, 1.5],
+    [15, 3.5],
+    [Infinity, 6]
+  ];
+
+  return steps.find(([max]) => z <= max)[1];
+}
+
+
+
+
+
+// Create marker with correct shape
+function createMarker(lat, lon, symbol) {
+  const size = getMarkerPixelSize();
+
+  // ===== CIRCLE =====
+  if (symbol.shape === "circle") {
+    const marker = L.circleMarker([lat, lon], {
+      radius: size,
+      color: symbol.color,
+      fillColor: symbol.color,
+      fillOpacity: 0.95,
+      renderer: canvasRenderer
+    });
+
+    marker._base = { lat, lon, symbol };
+    return marker;
   }
 
-  .mobile-overlay {
-  position: fixed;
+  function pixelOffset() {
+    const zoom = map.getZoom();
+    const scale = 40075016.686 / Math.pow(2, zoom + 8);
+    const latOffset = size * scale / 111320;
+    const lngOffset = latOffset / Math.cos(lat * Math.PI / 180);
+    return [latOffset, lngOffset];
+  }
 
-  /* Match sidebar top exactly */
-  top: calc(70px + env(safe-area-inset-top));
-  left: 0;
-  right: 0;
-  bottom: 0;
+  const [dLat, dLng] = pixelOffset();
 
-  background: rgba(0,0,0,0.45);
-  display: none;
-  z-index: 2500;
+  let shape;
+
+  if (symbol.shape === "square") {
+    shape = L.rectangle([[lat - dLat, lon - dLng], [lat + dLat, lon + dLng]], {
+      color: symbol.color,
+      fillColor: symbol.color,
+      fillOpacity: 0.95,
+      weight: 1,
+      renderer: canvasRenderer
+    });
+  }
+
+  if (symbol.shape === "triangle") {
+    shape = L.polygon(
+      [[lat + dLat, lon], [lat - dLat, lon - dLng], [lat - dLat, lon + dLng]],
+      {
+        color: symbol.color,
+        fillColor: symbol.color,
+        fillOpacity: 0.95,
+        weight: 1,
+        renderer: canvasRenderer
+      }
+    );
+  }
+
+  if (symbol.shape === "diamond") {
+    shape = L.polygon(
+      [[lat + dLat, lon], [lat, lon + dLng], [lat - dLat, lon], [lat, lon - dLng]],
+      {
+        color: symbol.color,
+        fillColor: symbol.color,
+        fillOpacity: 0.95,
+        weight: 1,
+        renderer: canvasRenderer
+      }
+    );
+  }
+
+  shape._base = { lat, lon, symbol };
+  return shape;
 }
 
-  .mobile-overlay.show {
-    display: block;
+
+
+// ================= FILTER CHECKBOX UI =================
+function buildRouteCheckboxes(routes) {
+  const c = document.getElementById("routeCheckboxes");
+  c.innerHTML = "";
+
+  routes.forEach(route => {
+    const label = document.createElement("label");
+
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.value = route;
+    checkbox.checked = true;
+    checkbox.addEventListener("change", applyFilters);
+
+    const text = document.createTextNode(" " + route);
+
+    label.appendChild(checkbox);
+    label.appendChild(text);
+
+    c.appendChild(label);
+  });
+}
+
+
+
+function buildDayCheckboxes() {
+  const c = document.getElementById("dayCheckboxes");
+  c.innerHTML = "";
+
+  [1,2,3,4,5,6,7].forEach(d => {
+    const l = document.createElement("label");
+    l.innerHTML = `<input type="checkbox" value="${d}" checked> ${dayName(d)}`;
+    l.querySelector("input").addEventListener("change", applyFilters);
+    c.appendChild(l);
+  });
+}
+buildDayCheckboxes();
+
+
+// Select/Deselect all checkboxes
+function setCheckboxGroup(containerId, checked) {
+  document.querySelectorAll(`#${containerId} input`).forEach(b => (b.checked = checked));
+  applyFilters();
+}
+
+document.getElementById("routesAll").onclick  = () => setCheckboxGroup("routeCheckboxes", true);
+document.getElementById("routesNone").onclick = () => setCheckboxGroup("routeCheckboxes", false);
+document.getElementById("daysAll").onclick    = () => setCheckboxGroup("dayCheckboxes", true);
+document.getElementById("daysNone").onclick   = () => setCheckboxGroup("dayCheckboxes", false);
+
+
+
+// ===== Route + Day ALL / NONE =====
+document.getElementById("routeDayAll").onclick  = () => {
+  document.querySelectorAll("#routeDayLayers input[type='checkbox']")
+    .forEach(cb => {
+      cb.checked = true;
+      cb.dispatchEvent(new Event("change"));
+    });
+};
+
+document.getElementById("routeDayNone").onclick = () => {
+  document.querySelectorAll("#routeDayLayers input[type='checkbox']")
+    .forEach(cb => {
+      cb.checked = false;
+      cb.dispatchEvent(new Event("change"));
+    });
+};
+
+
+// ================= APPLY MAP FILTERS =================
+function applyFilters() {
+
+  const routeCheckboxes = [...document.querySelectorAll("#routeCheckboxes input")];
+  const dayCheckboxes   = [...document.querySelectorAll("#dayCheckboxes input")];
+
+  let routes = routeCheckboxes.filter(i => i.checked).map(i => i.value);
+  const days = dayCheckboxes.filter(i => i.checked).map(i => i.value);
+
+  // 🔥 PREVENT route + delivered from both being active
+  const activeRoutes = new Set(routes);
+
+  activeRoutes.forEach(route => {
+
+    if (route.endsWith("|Delivered")) {
+
+      const baseRoute = route.replace("|Delivered", "");
+
+      if (activeRoutes.has(baseRoute)) {
+        const baseCheckbox = routeCheckboxes.find(cb => cb.value === baseRoute);
+        if (baseCheckbox) baseCheckbox.checked = false;
+        activeRoutes.delete(baseRoute);
+      }
+
+    } else {
+
+      const deliveredRoute = route + "|Delivered";
+
+      if (activeRoutes.has(deliveredRoute)) {
+        const deliveredCheckbox = routeCheckboxes.find(cb => cb.value === deliveredRoute);
+        if (deliveredCheckbox) deliveredCheckbox.checked = false;
+        activeRoutes.delete(deliveredRoute);
+      }
+
+    }
+
+  });
+
+  routes = Array.from(activeRoutes);
+
+  // 🔥 Now apply visibility
+  Object.entries(routeDayGroups).forEach(([key, group]) => {
+    const [r, d] = key.split("|");
+
+    const show = routes.includes(r) && days.includes(d);
+
+    group.layers.forEach(l => show ? l.addTo(map) : map.removeLayer(l));
+  });
+
+  updateStats();
+}
+
+
+
+// ================= ROUTE STATISTICS =================
+function updateStats() {
+  const list = document.getElementById("statsList");
+  list.innerHTML = "";
+
+  Object.entries(routeDayGroups).forEach(([key, group]) => {
+    const visible = group.layers.filter(l => map.hasLayer(l)).length;
+    if (!visible) return;
+
+    const [r,d] = key.split("|");
+    const li = document.createElement("li");
+    li.textContent = `Route ${r} – ${dayName(d)}: ${visible}`;
+    list.appendChild(li);
+  });
+}
+  // ===== BUILD ROUTE + DAY LAYER CHECKBOXES =====
+// ===== BUILD ROUTE + DAY LAYER CHECKBOXES =====
+function buildRouteDayLayerControls() {
+  const routeDayContainer = document.getElementById("routeDayLayers");
+  const deliveredContainer = document.getElementById("deliveredControls");
+
+  if (!routeDayContainer || !deliveredContainer) return;
+
+  routeDayContainer.innerHTML = "";
+  deliveredContainer.innerHTML = "";
+
+  Object.entries(routeDayGroups).forEach(([key, group]) => {
+    const count = group.layers ? group.layers.length : 0;
+    const [route, type] = key.split("|");
+    const dayNameMap = {
+  1: "Monday",
+  2: "Tuesday",
+  3: "Wednesday",
+  4: "Thursday",
+  5: "Friday",
+  6: "Saturday",
+  7: "Sunday"
+};
+
+    // === ROW WRAPPER ===
+const wrapper = document.createElement("div");
+wrapper.className = "layer-item";
+
+
+  
+    // === CHECKBOX ===
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.dataset.key = key;
+
+    // Default state on load:
+// Route + Day = checked
+// Delivered = unchecked
+
+if (layerVisibilityState.hasOwnProperty(key)) {
+  checkbox.checked = layerVisibilityState[key];
+} else {
+  if (type === "Delivered") {
+    checkbox.checked = false;
+    layerVisibilityState[key] = false;
+  } else {
+    checkbox.checked = true;
+    layerVisibilityState[key] = true;
   }
 }
 
+    // Apply visibility immediately
+    routeDayGroups[key].layers.forEach(marker => {
+      if (checkbox.checked) {
+        map.addLayer(marker);
+      } else {
+        map.removeLayer(marker);
+      }
+    });
+
+    // Toggle behavior
+    checkbox.addEventListener("change", () => {
+
+  layerVisibilityState[key] = checkbox.checked;
+
+  const [route, type] = key.split("|");
+
+  // 🚫 Prevent Route + Delivered both visible
+  Object.keys(routeDayGroups).forEach(otherKey => {
+
+    const [otherRoute, otherType] = otherKey.split("|");
+
+    if (
+      otherRoute === route &&
+      otherKey !== key &&
+      (
+        (type === "Delivered" && otherType !== "Delivered") ||
+        (type !== "Delivered" && otherType === "Delivered")
+      )
+    ) {
+      // uncheck the conflicting layer
+      layerVisibilityState[otherKey] = false;
+
+      const otherCheckbox =
+        document.querySelector(`input[data-key="${otherKey}"]`);
+
+      if (otherCheckbox) otherCheckbox.checked = false;
+
+      routeDayGroups[otherKey].layers.forEach(m =>
+        map.removeLayer(m)
+      );
+    }
+  });
+
+  // Apply this checkbox visibility
+  routeDayGroups[key].layers.forEach(marker => {
+    if (checkbox.checked) {
+      map.addLayer(marker);
+    } else {
+      map.removeLayer(marker);
+    }
+  });
+
+});
 
 
-/* ===== MOBILE SIDEBAR SLIDE-IN (REQUIRED FOR MENU BUTTON) ===== */
-@media (max-width: 900px) {
+    // === SYMBOL PREVIEW ===
+    const symbol = getSymbol(key);
 
-  .sidebar {
-    position: fixed;
+    const preview = document.createElement("span");
+    preview.className = "layer-preview";
+    preview.style.background = symbol.color;
 
-    top: calc(70px + env(safe-area-inset-top));
-    left: 0;
+    if (symbol.shape === "circle") preview.style.borderRadius = "50%";
+    if (symbol.shape === "square") preview.style.borderRadius = "2px";
 
-    height: calc(100dvh - 70px - env(safe-area-inset-top));
+    if (symbol.shape === "triangle") {
+      preview.style.background = "transparent";
+      preview.style.width = "0";
+      preview.style.height = "0";
+      preview.style.borderLeft = "7px solid transparent";
+      preview.style.borderRight = "7px solid transparent";
+      preview.style.borderBottom = `14px solid ${symbol.color}`;
+    }
 
-    width: 85%;
-    max-width: 320px;
+    if (symbol.shape === "diamond") {
+      preview.style.transform = "rotate(45deg)";
+    }
 
-    transform: translateX(-100%);
-    transition: transform 0.25s ease;
+    // === LABEL ===
+    const labelText = document.createElement("span");
+   if (type !== "Delivered") {
+  const dayName = dayNameMap[type] || type;
+ if (type !== "Delivered") {
+  const dayName = dayNameMap[type] || type;
+  labelText.textContent = `Route ${route} - ${dayName} (${count})`;
+} else {
+  labelText.textContent = `Route ${route} - Delivered (${count})`;
+}
 
-    z-index: 3000;
-    overflow-y: auto;
+} else {
+  labelText.textContent = `Route ${route} - Delivered (${count})`;
+}
+
+
+
+    // === BUILD ROW ===
+    wrapper.appendChild(checkbox);
+    wrapper.appendChild(preview);
+    wrapper.appendChild(labelText);
+    
+
+    // === Decide which container ===
+    if (type === "Delivered") {
+      deliveredContainer.appendChild(wrapper);
+    } else {
+      routeDayContainer.appendChild(wrapper);
+    }
+  });
+}
+
+
+// ================= PROCESS ROUTE EXCEL =================
+function processExcelBuffer(buffer) {
+  const wb = XLSX.read(new Uint8Array(buffer), { type: "array" });
+  const ws = wb.Sheets[wb.SheetNames[0]];
+
+  const rows = XLSX.utils.sheet_to_json(ws);
+
+  // store globally for saving later
+  window._currentRows = rows;
+  window._currentWorkbook = wb;
+
+  // Clear previous map data
+  Object.values(routeDayGroups).forEach(g => g.layers.forEach(l => map.removeLayer(l)));
+  Object.keys(routeDayGroups).forEach(k => delete routeDayGroups[k]);
+  Object.keys(symbolMap).forEach(k => delete symbolMap[k]);
+  symbolIndex = 0;
+  globalBounds = L.latLngBounds();
+
+  const routeSet = new Set();
+
+  rows.forEach(row => {
+    const lat = Number(row.LATITUDE);
+    const lon = Number(row.LONGITUDE);
+    const route = String(row.NEWROUTE);
+    const day = String(row.NEWDAY);
+
+    if (!lat || !lon || !route || !day) return;
+
+    let key;
+
+const status = String(row.del_status || "")
+  .trim()
+  .toLowerCase();
+
+if (status === "delivered") {
+  key = `${route}|Delivered`;
+} else {
+  key = `${route}|${day}`;
+}
+
+
+    const symbol = getSymbol(key);
+
+    if (!routeDayGroups[key]) routeDayGroups[key] = { layers: [] };
+
+  // Build full street address safely
+const fullAddress = [
+  row["CSADR#"] || "",
+  row["CSSDIR"] || "",
+  row["CSSTRT"] || "",
+  row["CSSFUX"] || ""
+].join(" ").replace(/\s+/g, " ").trim();
+
+// Build popup content
+const popupContent = `
+  <div style="font-size:14px; line-height:1.4;">
+    <div style="font-weight:bold; font-size:15px; margin-bottom:6px;">
+      ${fullAddress || "Address not available"}
+    </div>
+
+    <div><strong>Container Size:</strong> ${row["SIZE"] || "-"}</div>
+    <div><strong>Quantity:</strong> ${row["QTY"] || "-"}</div>
+    <div><strong>Bin #:</strong> ${row["BINNO"] || "-"}</div>
+  </div>
+`;
+
+const marker = createMarker(lat, lon, symbol)
+  .bindPopup(popupContent)
+  .addTo(map);
+// ===== STREET LABEL (ZOOM-BASED) =====
+const streetNumber = row["CSADR#"] ? String(row["CSADR#"]).trim() : "";
+const streetName = row["CSSTRT"] ? String(row["CSSTRT"]).trim() : "";
+
+const labelText = `${streetNumber} ${streetName}`.trim();
+
+if (labelText) {
+  marker.bindTooltip(labelText, {
+    permanent: false,
+    direction: "top",
+    offset: [0, -8],
+    className: "street-label"
+  });
+
+  marker._hasStreetLabel = true;
+}
+
+
+    // 🔥 CRITICAL: link marker to Excel row
+    marker._rowRef = row;
+
+  // ✅ Bright green delivered styling (SAFE + NORMALIZED)
+if (status === "delivered") {
+  marker.setStyle?.({
+    color: "#00FF00",
+    fillColor: "#00FF00",
+    fillOpacity: 1,
+    opacity: 1
+  });
+}
+
+    
+    routeDayGroups[key].layers.push(marker);
+    routeSet.add(route);
+    globalBounds.extend([lat, lon]);
+  });
+
+  buildRouteCheckboxes([...routeSet]);
+  buildRouteDayLayerControls();
+  applyFilters();
+
+  if (globalBounds.isValid()) map.fitBounds(globalBounds);
+}
+
+
+
+// ================= LIST FILES FROM CLOUD =================
+async function listFiles() {
+  const { data, error } = await sb.storage.from(BUCKET).list();
+  if (error) return console.error(error);
+
+  const ul = document.getElementById("savedFiles");
+  ul.innerHTML = "";
+
+  const routeFiles = {};
+  const summaryFiles = {};
+
+ // Separate route files and summary files
+data.forEach(file => {
+  const name = file.name.toLowerCase();
+
+  if (name.includes("routesummary")) {
+    summaryFiles[normalizeName(name)] = file.name;
+  } else {
+    routeFiles[normalizeName(name)] = file.name;
+  }
+});
+
+
+  // Build UI
+  Object.keys(routeFiles).forEach(key => {
+    const routeName = routeFiles[key];
+    const summaryName = summaryFiles[key];
+
+    const li = document.createElement("li");
+
+    // OPEN MAP
+    const openBtn = document.createElement("button");
+openBtn.textContent = "Open Map";
+   openBtn.onclick = async () => {
+  try {
+
+    showLoading("Loading Excel file...");
+
+    const { data } = sb.storage.from(BUCKET).getPublicUrl(routeName);
+
+    const urlWithBypass = data.publicUrl + "?v=" + Date.now();
+
+    const r = await fetch(urlWithBypass, {
+      cache: "no-store"
+    });
+
+    window._currentFilePath = routeName;
+
+    processExcelBuffer(await r.arrayBuffer());
+    loadSummaryFor(routeName);
+
+    hideLoading("File Loaded Successfully ✅");
+
+  } catch (err) {
+    console.error(err);
+    hideLoading();
+    alert("Error loading file.");
+  }
+};
+
+
+
+    li.appendChild(openBtn);
+
+    // SUMMARY BUTTON
+    if (summaryName) {
+      const summaryBtn = document.createElement("button");
+      summaryBtn.textContent = "Summary";
+      summaryBtn.style.marginLeft = "5px";
+      summaryBtn.onclick = () => loadSummaryFor(routeName);
+      li.appendChild(summaryBtn);
+    }
+
+    // DELETE
+    const delBtn = document.createElement("button");
+    delBtn.textContent = "Delete";
+    delBtn.style.marginLeft = "5px";
+
+  delBtn.onclick = async () => {
+
+  const entered = prompt("Enter password to delete this file:");
+
+  if (entered !== DELETE_PASSWORD) {
+    alert("❌ Incorrect password. File not deleted.");
+    return;
   }
 
-}
+  const confirmed = confirm("Are you sure you want to permanently delete this file?");
+  if (!confirmed) return;
 
-  .sidebar.open {
-    transform: translateX(0);
-  }
+  const toDelete = [routeName];
+  if (summaryName) toDelete.push(summaryName);
 
-  .mobile-overlay {
-    position: fixed;
-    top: calc(70px + env(safe-area-inset-top));
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0,0,0,0.45);
-    display: none;
-    z-index: 2500;
-  }
+  await sb.storage.from(BUCKET).remove(toDelete);
 
-  .mobile-overlay.show {
-    display: block;
-  }
-}
-
-/* 🔽 PASTE THE NEW CODE RIGHT BELOW THIS LINE 🔽 */
+  alert("✅ File deleted successfully.");
+  listFiles();
+};
 
 
-
-
-
-/* ===== HEADER BUTTON LAYOUT ===== */
-.header-buttons {
-  display: flex;
-  gap: 14px;   /* more space between Refresh & Menu */
-  justify-content: center;
-  margin-top: 6px;
+    li.appendChild(delBtn);
+    li.appendChild(document.createTextNode(" " + routeName));
+    ul.appendChild(li);
+  });
 }
 
 
-/* ===== HARD REFRESH BUTTON (VISIBLE EVERYWHERE) ===== */
-#hardRefreshBtn {
-  background: #42a5f5;
-  color: #000;
-  border: none;
-  border-radius: 6px;
+// ================= UPLOAD FILE =================
+async function uploadFile(file) {
+  if (!file) return;
 
-  padding: 2px 10px;   /* smaller height + width */
-  font-size: 13px;     /* smaller text */
-  font-weight: 600;
+  try {
 
-  cursor: pointer;
-  z-index: 5000;
-}
+    showLoading("Uploading file...");
 
+    const { error } = await sb.storage
+      .from(BUCKET)
+      .upload(file.name, file, { upsert: true });
 
-#hardRefreshBtn:hover {
-  background: #64b5f6;
-}
+    if (error) {
+      throw error;
+    }
 
-/* ===== MOBILE MENU BUTTON ===== */
-#mobileMenuBtn {
-  background: #2a2a2a;
-  color: #fff;
-  border: 1px solid #444;
-  border-radius: 8px;
-  padding: 8px 14px;
-  font-size: 18px;
-  cursor: pointer;
-}
+    window._currentFilePath = file.name;
 
-/* Hide ONLY the menu button on desktop — NOT the refresh button */
-@media (min-width: 901px) {
-  #mobileMenuBtn {
-    display: none !important;
+    processExcelBuffer(await file.arrayBuffer());
+    listFiles();
+
+    hideLoading("Upload Complete ✅");
+
+  } catch (error) {
+    console.error("UPLOAD ERROR:", error);
+    hideLoading();
+    alert("Upload failed: " + error.message);
   }
 }
 
+// ================= ROUTE SUMMARY DISPLAY =================
+function showRouteSummary(rows, headers)
+ {
+  const tableBox = document.getElementById("routeSummaryTable");
+  const panel = document.getElementById("bottomSummary");
+  const btn = document.getElementById("summaryToggleBtn");
 
+  if (!tableBox || !panel || !btn) return;
 
-/* Tracking state (optional but recommended) */
-#locateMeBtn.tracking {
-  background: #e74c3c;
-}
+  tableBox.innerHTML = "";
 
-
-.sidebar-btn {
-  width: 100%;
-  margin-top: 8px;
-  padding: 8px;
-  border: none;
-  border-radius: 6px;
-  background: #2a93ff;
-  color: white;
-  font-weight: bold;
-  cursor: pointer;
-}
-
-.sidebar-btn.tracking {
-  background: #e74c3c; /* red while tracking */
-}
-
-
-
-
-
-
-/* =====================================================
-   LOCATE BUTTON — FINAL CLEAN VERSION
-   ===================================================== */
-
-/* Desktop version (inside right sidebar) */
-#desktopLocateContainer #locateMeBtn {
-  width: 100%;
-  margin-top: 10px;
-}
-
-/* Mobile header layout */
-.mobile-header-buttons {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  margin-top: 6px;
-}
-
-/* Modern mobile locate button */
-@media (max-width: 900px) {
-
-  #locateMeBtn {
-    width: 42px;
-    height: 42px;
-    padding: 0;
-
-    border-radius: 12px;
-    border: none;
-
-    font-size: 18px;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    background: #42a5f5;
-    color: #000;
-
-    box-shadow: 0 4px 12px rgba(0,0,0,0.4);
-    transition: all 0.2s ease;
+  if (!rows || !rows.length) {
+    tableBox.textContent = "No summary data found";
+    return;
   }
 
-  #locateMeBtn:active {
-    transform: scale(0.92);
-  }
-
-  #locateMeBtn.tracking {
-    background: #e74c3c;
-    box-shadow: 0 0 14px rgba(231,76,60,0.7);
-  }
- #bottomSummary.collapsed {
-  height: 40px;
-}
-}
+  // ✅ Get headers EXACTLY in Excel order
   
 
+  const table = document.createElement("table");
+  const thead = document.createElement("thead");
+  const tbody = document.createElement("tbody");
+
+  // ===== HEADER ROW =====
+  const headerRow = document.createElement("tr");
+  headers.forEach(h => {
+    const th = document.createElement("th");
+    th.textContent = h ?? "";
+    headerRow.appendChild(th);
+  });
+  thead.appendChild(headerRow);
+
+  // ===== DATA ROWS =====
+  rows.forEach(r => {
+    const tr = document.createElement("tr");
+
+    headers.forEach(h => {
+      const td = document.createElement("td");
+      td.textContent = r[h] ?? "";
+      tr.appendChild(td);
+    });
+
+    tbody.appendChild(tr);
+  });
+
+  table.appendChild(thead);
+  table.appendChild(tbody);
+  tableBox.appendChild(table);
+
+// AUTO-OPEN + FORCE VISIBLE HEIGHT
+const savedHeight = localStorage.getItem("summaryHeight");
+
+// Always prepare a usable expanded height
+const defaultHeight = window.innerWidth <= 900 ? 300 : 250;
+panel.style.height = (savedHeight && savedHeight > 60 ? savedHeight : defaultHeight) + "px";
+
+// Only auto-open on desktop
+if (window.innerWidth > 900) {
+  panel.classList.remove("collapsed");
+  btn.textContent = "▼";
 }
 
 
-/* =====================================================
-   MODERN HEADING ARROW (GPS DIRECTION INDICATOR)
-   ===================================================== */
-
-.heading-icon-modern {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  filter: drop-shadow(0 0 6px rgba(66,165,245,0.6));
 }
 
-/* Smooth rotation container */
-.heading-icon-modern > div {
-  will-change: transform;
-}
 
-/* ===== MOBILE COMPLETE BUTTON ===== */
 
-/* Hide mobile button on desktop */
-#completeStopsBtnMobile {
-  display: none;
-}
-
-/* On small screens */
-@media (max-width: 768px) {
-
-  /* Hide sidebar version */
-  #completeStopsBtn {
-    display: none;
+// Load matching summary file
+async function loadSummaryFor(routeFileName) {
+  const { data, error } = await sb.storage.from(BUCKET).list();
+  if (error) {
+    console.error("LIST ERROR:", error);
+    return;
   }
 
-  /* Show header version */
-  #completeStopsBtnMobile {
-    display: inline-block;
-  }
-}
+  console.log("ALL FILES:", data.map(f => f.name));
+  console.log("ROUTE FILE CLICKED:", routeFileName);
 
-/* ===== MOBILE HEADER BUTTON FIX ===== */
-#completeStopsBtnMobile {
-  display: none;
-}
+  const normalizedRoute = normalizeName(routeFileName);
+  console.log("NORMALIZED ROUTE:", normalizedRoute);
 
-@media (max-width: 768px) {
-  #completeStopsBtnMobile {
-    display: inline-flex !important;
-    align-items: center;
-    justify-content: center;
-  }
+  const summary = data.find(f => {
+    const lower = f.name.toLowerCase();
+    const normalizedSummary = normalizeName(f.name);
 
-  /* Hide desktop Complete button on mobile */
-  #completeStopsBtn {
-    display: none !important;
-  }
-}
+    console.log("CHECKING:", f.name, "→", normalizedSummary);
 
-/* Ensure mobile header button order */
-@media (max-width: 900px) {
+    return (
+      lower.includes("routesummary") ||
+      lower.includes("route summary")
+    ) && normalizedSummary === normalizedRoute;
+  });
 
-  #hardRefreshBtn { order: 1; }
-  #mobileMenuBtn { order: 2; }
-  #locateMeBtn { order: 3; }
-  #completeStopsBtnMobile { order: 4; }
+  console.log("FOUND SUMMARY:", summary);
 
-}
-
-
-/* ===============================
-   FORCE MOBILE COMPLETE BUTTON
-   =============================== */
-
-/* Hide mobile button on desktop */
-#completeStopsBtnMobile {
-  display: none;
-}
-
-/* Show it clearly in the header on phones */
-@media (max-width: 900px) {
-
-  #completeStopsBtnMobile {
-    display: inline-flex !important;
-    align-items: center;
-    justify-content: center;
-
-    height: 42px;
-    padding: 0 14px;
-
-    background: #42a5f5;
-    color: #000;
-    border: none;
-    border-radius: 10px;
-    font-weight: 600;
-
-    z-index: 6000; /* above overlays */
+  if (!summary) {
+    document.getElementById("routeSummaryTable").textContent = "No summary available";
+    return;
   }
 
-  /* Hide the desktop sidebar version */
-  #completeStopsBtn {
-    display: none !important;
-  }
+  const { data: urlData } = sb.storage.from(BUCKET).getPublicUrl(summary.name);
+  const r = await fetch(urlData.publicUrl);
+
+  const wb = XLSX.read(new Uint8Array(await r.arrayBuffer()), { type: "array" });
+const ws = wb.Sheets[wb.SheetNames[0]];
+
+// Read entire sheet as grid
+const raw = XLSX.utils.sheet_to_json(ws, { header: 1 });
+
+// ===== FIND FIRST NON-EMPTY ROW =====
+let startRow = raw.findIndex(r =>
+  r && r.some(cell => String(cell || "").trim() !== "")
+);
+
+if (startRow === -1) {
+  showRouteSummary([], []);
+  return;
 }
 
-/* ===== Days Collapsible ===== */
+// ===== DETECT MULTI-ROW HEADERS (supports 1–3+) =====
+let headerRows = [raw[startRow]];
+let nextRow = raw[startRow + 1];
+let thirdRow = raw[startRow + 2];
 
-/* ===== Days Collapsible ===== */
+function looksLikeHeader(row) {
+  if (!row) return false;
 
-.collapsible-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  cursor: pointer;
+  const filled = row.filter(c => String(c || "").trim() !== "").length;
+  const numeric = row.filter(c => !isNaN(parseFloat(c))).length;
+
+  return filled > 0 && numeric < filled / 2;
 }
 
-.days-title {
-  display: flex;
-  align-items: center;
-  gap: 6px;
+if (looksLikeHeader(nextRow)) headerRows.push(nextRow);
+if (looksLikeHeader(thirdRow)) headerRows.push(thirdRow);
+
+// ===== BUILD SAFE COLUMN NAMES =====
+const columnCount = Math.max(...headerRows.map(r => r.length));
+
+const headers = Array.from({ length: columnCount }, (_, col) => {
+  const parts = headerRows
+    .map(r => String(r[col] || "").trim())
+    .filter(Boolean);
+
+  return parts.join(" ") || `Column ${col + 1}`;
+});
+
+// ===== DATA STARTS AFTER HEADER =====
+const dataStartIndex = startRow + headerRows.length;
+
+// ===== BUILD ROW OBJECTS =====
+const rows = raw.slice(dataStartIndex).map(r => {
+  const obj = {};
+  headers.forEach((h, i) => {
+    obj[h] = r?.[i] ?? "";
+  });
+  return obj;
+});
+
+
+
+
+showRouteSummary(rows, headers);
+
+
+// 🔽 FORCE the panel open when a summary exists
+const panel = document.getElementById("bottomSummary");
+const btn = document.getElementById("summaryToggleBtn");
+
+const isMobile = window.innerWidth <= 900;
+
+if (panel && btn && !isMobile) {
+  panel.classList.remove("collapsed");
+  btn.textContent = "▼";
 }
 
-.arrow {
-  font-size: 12px;
-  transition: transform 0.2s ease;
+
+
 }
 
-.collapsible-content {
-  overflow: hidden;
-  transition: max-height 0.25s ease;
+
+
+// ================= START APP =================
+// ===== TOGGLE BOTTOM SUMMARY =====
+function toggleSummary() {
+  const panel = document.getElementById("bottomSummary");
+  const btn = document.getElementById("summaryToggleBtn");
+
+  panel.classList.toggle("collapsed");
+
+  // flip arrow direction
+  btn.textContent = panel.classList.contains("collapsed") ? "▲" : "▼";
 }
+// ===== PLACE LOCATE BUTTON BASED ON SCREEN SIZE =====
+function placeLocateButton() {
+  const locateBtn = document.getElementById("locateMeBtn");
+  const completeBtn = document.getElementById("completeStopsBtn");
+  const headerContainer = document.querySelector(".mobile-header-buttons");
+  const desktopContainer = document.getElementById("desktopLocateContainer");
+  const undoBtn = document.getElementById("undoDeliveredBtn");
+  const streetToggle = document.getElementById("streetLabelToggle");
 
-.collapsible-content.collapsed {
-  max-height: 0;
-}
+  if (!locateBtn || !completeBtn || !headerContainer || !desktopContainer) return;
 
-.collapsible-content:not(.collapsed) {
-  max-height: 600px;
-}
+  if (window.innerWidth <= 900) {
+    // 📱 MOBILE
+    headerContainer.appendChild(locateBtn);
+    headerContainer.appendChild(completeBtn);
+    if (undoBtn) headerContainer.appendChild(undoBtn);
 
-/* Rotate arrow when open */
-.collapsible-header.open .arrow {
-  transform: rotate(90deg);
-}
+    if (streetToggle) {
+      headerContainer.appendChild(streetToggle.parentElement);
+    }
 
-/* ===== Collapsible Sections ===== */
+    completeBtn.textContent = "✔";
 
-.collapsible-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  cursor: pointer;
-}
+  } else {
+    // 🖥 DESKTOP
+    desktopContainer.appendChild(locateBtn);
+    desktopContainer.appendChild(completeBtn);
+    if (undoBtn) desktopContainer.appendChild(undoBtn);
 
-.routes-title {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
+    if (streetToggle) {
+      desktopContainer.appendChild(streetToggle.parentElement);
+    }
 
-.arrow {
-  font-size: 12px;
-  transition: transform 0.2s ease;
-}
-
-.collapsible-content {
-  overflow: hidden;
-  transition: max-height 0.25s ease;
-}
-
-.collapsible-content.collapsed {
-  max-height: 0;
-}
-
-.collapsible-content:not(.collapsed) {
-  max-height: 600px;
-}
-
-/* Rotate arrow when open */
-.collapsible-header.open .arrow {
-  transform: rotate(90deg);
-}
-
-.layer-item {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  margin-bottom: 4px;
-}
-
-.layer-preview {
-  width: 14px;
-  height: 14px;
-  display: inline-block;
-}
-
-/* ===== Undo Pulse Animation ===== */
-@keyframes undoPulse {
-  0% {
-    box-shadow: 0 0 0 0 rgba(229, 57, 53, 0.6);
-  }
-  70% {
-    box-shadow: 0 0 0 10px rgba(229, 57, 53, 0);
-  }
-  100% {
-    box-shadow: 0 0 0 0 rgba(229, 57, 53, 0);
-  }
-}
-
-/* Apply pulse */
-.undo-btn.pulse {
-  animation: undoPulse 1.8s infinite;
-}
-
-/* Move LEFT controls (zoom, draw, etc.) halfway down */
-.leaflet-top.leaflet-left {
-  top: 50% !important;
-  transform: translateY(-50%);
-}
-
-/* Move RIGHT controls (if any) halfway down */
-.leaflet-top.leaflet-right {
-  top: 50% !important;
-  transform: translateY(-50%);
-}
-
-@media (max-width: 768px) {
-  body {
-    overflow: hidden;
-    height: 100dvh;
+    completeBtn.textContent = "Complete Stops";
   }
 }
 
+//undo button state
+function updateUndoButtonState() {
+  const undoBtn = document.getElementById("undoDeliveredBtn");
+  if (!undoBtn) return;
 
-.custom-stop-marker {
-  background: transparent;
-  border: none;
-}
-
-.marker-label {
-  background: #1e90ff;
-  color: white;
-  font-size: 11px;
-  font-weight: bold;
-  text-align: center;
-  padding: 4px 6px;
-  border-radius: 14px;
-  white-space: nowrap;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.4);
-}
-
-.street-label {
-  background: rgba(0, 0, 0, 0.85);
-  color: white;
-  border: none;
-  padding: 2px 6px;
-  font-size: 11px;
-  border-radius: 4px;
-  pointer-events: none;
-  box-shadow: none;
-}
-
-
-/* ===== Street Label Toggle ===== */
-.street-toggle {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 14px;
-  margin-top: 10px;
-  margin-bottom: 10px;
-  cursor: pointer;
-  color: white;
-}
-
-.street-toggle input {
-  cursor: pointer;
-}
-
-
-
-.mobile-only {
-  display: none;
-}
-
-@media (max-width: 768px) {
-  .mobile-only {
-    display: flex;
+  const polygon = drawnLayer.getLayers()[0];
+  if (!polygon) {
+    undoBtn.classList.remove("pulse");
+    return;
   }
 
-  #selectionBox .street-toggle {
-    display: none;
+  let hasDeliveredInSelection = false;
+
+  Object.entries(routeDayGroups).forEach(([key, group]) => {
+
+    if (!key.endsWith("|Delivered")) return;
+
+    group.layers.forEach(marker => {
+
+      if (!map.hasLayer(marker)) return;
+
+      const pos = marker.getLatLng();
+
+      if (
+        polygon.getBounds().contains(pos) &&
+        marker._rowRef &&
+        String(marker._rowRef.del_status || "").trim().toLowerCase() === "delivered"
+      ) {
+        hasDeliveredInSelection = true;
+      }
+
+    });
+  });
+
+  if (hasDeliveredInSelection) {
+    undoBtn.classList.add("pulse");
+  } else {
+    undoBtn.classList.remove("pulse");
   }
 }
 
-/* ================= SUN MODE ================= */
 
-.header-top {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 20px;
-  flex-wrap: wrap;
+
+
+
+
+
+
+
+function initApp() { //begining of initApp=================================================================
+
+// ===== RIGHT SIDEBAR TOGGLE =====
+
+// ===== RIGHT SIDEBAR TOGGLE =====
+const selectionBox = document.getElementById("selectionBox");
+const toggleSelectionBtn = document.getElementById("toggleSelectionBtn");
+const clearBtn = document.getElementById("clearSelectionBtn");
+
+// ===== COMPLETE STOPS BUTTON =====
+const completeBtnDesktop = document.getElementById("completeStopsBtn");
+const completeBtnMobile  = document.getElementById("completeStopsBtnMobile");
+
+
+  
+// Toggle sidebar open/closed
+if (selectionBox && toggleSelectionBtn) {
+  toggleSelectionBtn.onclick = () => {
+    const collapsed = selectionBox.classList.toggle("collapsed");
+    toggleSelectionBtn.textContent = collapsed ? "❮" : "❯";
+  };
 }
 
-.theme-toggle {
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  white-space: nowrap;
-}
+// Clear selection button (ALWAYS ACTIVE)
+if (clearBtn) {
+  clearBtn.onclick = () => {
+    // Remove polygon
+    drawnLayer.clearLayers();
 
-.theme-toggle input {
-  margin-right: 5px;
-}
-
-/* Sunlight Mode Theme */
-
-body.sun-mode {
-  background: #ffffff;
-  color: #000;
-}
-
-body.sun-mode header {
-  background: #ffffff;
-  border-bottom: 2px solid #ccc;
-}
-
-body.sun-mode .sidebar {
-  background: #f5f5f5;
-  color: #000;
-}
-
-body.sun-mode #selectionBox {
-  background: #ffffff;
-  color: #000;
-}
-
-body.sun-mode .filter-group {
-  border-color: #ccc;
-}
-
-body.sun-mode .primary-btn {
-  background: #000;
-  color: #fff;
-}
-
-body.sun-mode .mini-btn {
-  background: #e0e0e0;
-  color: #000;
-}
-
-/* ================= SUN MODE ================= */
-
-body.sun-mode {
-  background: #ffffff;
-  color: #111;
-}
-
-/* Sidebar */
-body.sun-mode .sidebar {
-  background: #f4f4f4;
-  color: #111;
-}
-
-/* Header */
-body.sun-mode header {
-  background: #ffffff;
-  color: #111;
-  border-bottom: 1px solid #ccc;
-}
-
-/* Buttons */
-body.sun-mode button {
-  background: #ffffff;
-  color: #111;
-  border: 1px solid #ccc;
-}
-
-body.sun-mode button:hover {
-  background: #eaeaea;
-}
-
-/* Inputs */
-body.sun-mode input,
-body.sun-mode select {
-  background: #ffffff;
-  color: #111;
-  border: 1px solid #ccc;
-}
-
-/* Layer section boxes */
-body.sun-mode .layer-section {
-  background: #ffffff;
-  color: #111;
-}
-
-/* ===== SUN MODE SIDEBAR FIX ===== */
-
-body.sun-mode .sidebar {
-  background: #f0f0f0;
-  color: #111;
-}
-
-body.sun-mode .sidebar * {
-  color: #111 !important;
-}
-
-body.sun-mode .sidebar strong {
-  color: #000 !important;
-}
+    
 
 
-body.sun-mode .sidebar h1,
-body.sun-mode .sidebar h2,
-body.sun-mode .sidebar h3,
-body.sun-mode .sidebar h4 {
-  color: #000 !important;
-  font-weight: 600;
-}
+    // Restore original marker colors
+    Object.entries(routeDayGroups).forEach(([key, group]) => {
+      const sym = symbolMap[key];
+      group.layers.forEach(marker => {
+        marker.setStyle?.({ color: sym.color, fillColor: sym.color });
+      });
+    });
 
-body.sun-mode .sidebar label,
-body.sun-mode .sidebar span,
-body.sun-mode .sidebar p {
-  color: #000 !important;
-}
-
-
-
-/* ================= SUN MODE – FORCE SIDEBAR FIX ================= */
-
-body.sun-mode .sidebar,
-body.sun-mode .sidebar * {
-  color: #000000 !important;
-}
-
-body.sun-mode .sidebar {
-  background: #f5f5f5 !important;
-}
-
-body.sun-mode .filter-group {
-  background: #ffffff !important;
-  border: 1px solid #dddddd !important;
-}
-
-body.sun-mode .filter-header {
-  background: transparent !important;
-}
-
-/* ================= SUN MODE – SIDEBAR FIX ================= */
-
-body.sun-mode .sidebar {
-  background: #f4f6f8 !important;
-  color: #000 !important;
-}
-
-/* Force all text inside sidebar to be readable */
-body.sun-mode .sidebar strong,
-body.sun-mode .sidebar label,
-body.sun-mode .sidebar span,
-body.sun-mode .sidebar div,
-body.sun-mode .sidebar li,
-body.sun-mode .sidebar button,
-body.sun-mode .sidebar p {
-  color: #000 !important;
-}
-
-/* Section boxes */
-body.sun-mode .filter-group {
-  background: #ffffff !important;
-  border: 1px solid #ddd !important;
-}
-
-/* Remove dark header backgrounds */
-body.sun-mode .filter-header {
-  background: transparent !important;
-}
-
-
-/* ===== HEADER TOP LAYOUT ===== */
-.header-top {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-}
-
-/* Download button on far left */
-.download-btn {
-  position: absolute;
-  left: 15px;
-
-  background: #2a2a2a;
-  color: white;
-  border: 1px solid #444;
-  padding: 6px 10px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 14px;
-  transition: 0.2s;
-}
-
-.download-btn:hover {
-  background: #444;
-}
-
-/* ===== DOWNLOAD MODAL ===== */
-.modal {
-  display: none;
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.5);
-  justify-content: center;
-  align-items: center;
-  z-index: 9999;
-}
-
-.modal-content {
-  background: #1e1e1e;
-  padding: 20px;
-  border-radius: 8px;
-  width: 300px;
-  text-align: center;
-}
-
-.modal-actions {
-  margin-top: 15px;
-  display: flex;
-  justify-content: space-between;
-}
-
-.modal button {
-  padding: 6px 12px;
-  cursor: pointer;
-}
-
-
-/* ================= FILE MANAGER BUTTON ================= */
-.file-manager-btn {
-  width: 100%;
-}
-
-/* ================= MODAL BASE ================= */
-.modal {
-  display: none;              /* hidden by default */
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.6);
-
-  justify-content: center;
-  align-items: center;
-
-  z-index: 10000;
-}
-
-/* Only show when active */
-.modal.show {
-  display: flex;
-}
-
-/* ================= MODAL CONTENT ================= */
-.modal-content {
-  background: #1e1e1e;
-  padding: 20px;
-  border-radius: 10px;
-  width: 90%;
-  max-width: 400px;
-  color: white;
-  max-height: 70vh;
-  overflow-y: auto;
-}
-
-.modal-actions {
-  margin-top: 15px;
-  text-align: right;
-}
-
-.modal-actions button {
-  padding: 6px 12px;
-  border-radius: 6px;
-  border: none;
-  cursor: pointer;
+    // 🔥 Force counter refresh everywhere (desktop + mobile)
+    updateSelectionCount();
+    updateUndoButtonState();
+  };
 }
 
 
 
 
 
-/* ===== FILE LOADING OVERLAY ===== */
 
-#loadingOverlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.6);
-  backdrop-filter: blur(4px);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 999999; /* must be above Leaflet */
+
+  
+// ===== FILE UPLOAD (DRAG + CLICK) =====
+const dropZone = document.getElementById("dropZone");
+
+// create hidden file input dynamically (so no HTML change needed)
+let fileInput = document.getElementById("fileInput");
+if (!fileInput) {
+  fileInput = document.createElement("input");
+  fileInput.type = "file";
+  fileInput.accept = ".xlsx,.xls,.csv";
+  fileInput.id = "fileInput";
+  fileInput.hidden = true;
+  document.body.appendChild(fileInput);
 }
 
-#loadingOverlay.hidden {
-  display: none !important;
+// CLICK → open picker
+dropZone.addEventListener("click", () => fileInput.click());
+
+// FILE SELECTED
+fileInput.addEventListener("change", e => {
+  const file = e.target.files[0];
+  if (file) uploadFile(file);
+});
+
+// PREVENT browser opening file on drop
+["dragenter", "dragover", "dragleave", "drop"].forEach(evt => {
+  dropZone.addEventListener(evt, e => e.preventDefault());
+});
+
+// DROP → upload
+dropZone.addEventListener("drop", e => {
+  const file = e.dataTransfer.files[0];
+  if (file) uploadFile(file);
+});
+
+
+// ===== INITIAL MAP LAYER + USER LOCATION =====
+baseMaps.streets.addTo(map);
+
+
+
+  
+  // ===== BASE MAP DROPDOWN =====
+  const baseSelect = document.getElementById("baseMapSelect");
+if (baseSelect) {
+  baseSelect.addEventListener("change", e => {
+    Object.values(baseMaps).forEach(l => map.removeLayer(l));
+    map.removeLayer(satelliteLabelsLayer);
+
+    const selected = e.target.value;
+    baseMaps[selected].addTo(map);
+
+    if (selected === "satellite" && map.getZoom() >= 15) {
+      satelliteLabelsLayer.addTo(map);
+    }
+  });
 }
 
-.loading-card {
-  background: #1e1e1e;
-  padding: 25px 35px;
-  border-radius: 12px;
-  text-align: center;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-  color: white;
-  min-width: 200px;
+  // ===== SIDEBAR TOGGLE (DESKTOP) =====
+  const toggleSidebarBtn = document.getElementById("toggleSidebarBtn");
+  const sidebar = document.querySelector(".sidebar");
+  const appContainer = document.querySelector(".app-container");
+
+  if (toggleSidebarBtn && sidebar && appContainer) {
+    toggleSidebarBtn.addEventListener("click", () => {
+      appContainer.classList.toggle("collapsed");
+
+      toggleSidebarBtn.textContent =
+        appContainer.classList.contains("collapsed") ? "▶" : "◀";
+
+      setTimeout(() => map.invalidateSize(), 200);
+    });
+  }
+
+// ===== MOBILE MENU =====
+const mobileMenuBtn = document.getElementById("mobileMenuBtn");
+
+const overlay = document.querySelector(".mobile-overlay");
+
+if (mobileMenuBtn && sidebar && overlay) {
+
+  mobileMenuBtn.addEventListener("click", () => {
+    const open = sidebar.classList.toggle("open");
+
+    mobileMenuBtn.textContent = open ? "✕" : "☰";
+    overlay.classList.toggle("show", open);
+
+    setTimeout(() => map.invalidateSize(), 200);
+  });
+
+  overlay.addEventListener("click", () => {
+    sidebar.classList.remove("open");
+    overlay.classList.remove("show");
+    mobileMenuBtn.textContent = "☰";
+  });
 }
-
-.spinner {
-  width: 35px;
-  height: 35px;
-  border: 4px solid #444;
-  border-top: 4px solid #00c853;
-  border-radius: 50%;
-  margin: 0 auto 15px;
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
+// ===== MOBILE SELECTION TOGGLE =====
+const mobileSelBtn = document.getElementById("mobileSelectionBtn");
 
 
+if (mobileSelBtn && selectionBox) {
 
-/* ===== Saved Files Buttons Improvements ===== */
+  mobileSelBtn.addEventListener("click", () => {
+    selectionBox.classList.toggle("show");
+  });
 
-.file-list button {
-  padding: 10px 16px;          /* Bigger click area */
-  margin: 6px 6px 6px 0;       /* Space between buttons */
-  border-radius: 8px;
-  font-size: 14px;
-  cursor: pointer;
-  transition: transform 0.1s ease, box-shadow 0.1s ease;
-}
-
-.file-list button:hover {
-  transform: translateY(-2px); /* Slight lift */
-  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-}
-
-.file-list button:active {
-  transform: scale(0.97);
-}
-
-
-.file-row-actions {
-  display: flex;
-  gap: 12px; /* space between buttons */
-}
-
-
-
-
-.delete-btn {
-  background-color: #b00020;
-  color: white;
-}
-
-.delete-btn:hover {
-  background-color: #d32f2f;
+  // keep count synced
+  const originalUpdate = updateSelectionCount;
+  updateSelectionCount = function () {
+    originalUpdate();
+    mobileSelBtn.textContent =
+      "Selected: " + document.getElementById("selectionCount").textContent;
+  };
 }
 
 
+  // ===== RESIZABLE BOTTOM SUMMARY PANEL =====
+  const panel = document.getElementById("bottomSummary");
+  const header = document.querySelector(".bottom-summary-header");
+  const toggleBtn = document.getElementById("summaryToggleBtn");
+
+  if (panel && header) {
+    let isDragging = false;
+    let startY = 0;
+    let startHeight = 0;
+
+    // Restore saved height
+    const savedHeight = localStorage.getItem("summaryHeight");
+    if (savedHeight) panel.style.height = savedHeight + "px";
+
+    // ===== FORCE MOBILE TO START COLLAPSED =====
+if (window.innerWidth <= 900) {
+  panel.classList.add("collapsed");
+  panel.style.height = "40px";
+}
+
+    // Drag resize
+    header.addEventListener("mousedown", e => {
+      isDragging = true;
+      startY = e.clientY;
+      startHeight = panel.offsetHeight;
+      document.body.style.userSelect = "none";
+    });
+
+    document.addEventListener("mousemove", e => {
+      if (!isDragging) return;
+
+      const delta = startY - e.clientY;
+      let newHeight = startHeight + delta;
+
+      const minHeight = 40;
+      const maxHeight = window.innerHeight - 100;
+
+      newHeight = Math.max(minHeight, Math.min(maxHeight, newHeight));
+      panel.style.height = newHeight + "px";
+    });
+
+    document.addEventListener("mouseup", () => {
+  if (!isDragging) return;
+  isDragging = false;
+  document.body.style.userSelect = "";
+  localStorage.setItem("summaryHeight", panel.offsetHeight);
+
+  // Hide resize hint after first drag
+  const hint = document.querySelector(".resize-hint");
+  if (hint) hint.style.display = "none";
+});
 
 
-.open-btn {
-  background-color: #2a93ff;
-  color: white;
+    // Collapse toggle
+if (toggleBtn) {
+  toggleBtn.onclick = () => {
+    const isCollapsed = panel.classList.toggle("collapsed");
+
+   if (isCollapsed) {
+  localStorage.setItem("summaryHeight", panel.offsetHeight);
+  panel.style.height = "40px";
+  toggleBtn.textContent = "▲";
+} else {
+  let restored = localStorage.getItem("summaryHeight");
+
+  if (!restored || restored <= 60) {
+    restored = window.innerWidth <= 900 ? 300 : 250;
+  }
+
+  panel.style.height = restored + "px";
+  toggleBtn.textContent = "▼";
+}
+
+  };
+}
+
+  }
+
+  // ===== POP-OUT SUMMARY WINDOW =====
+  const popoutBtn = document.getElementById("popoutSummaryBtn");
+
+  if (popoutBtn) {
+    popoutBtn.onclick = () => {
+      const tableHTML = document.getElementById("routeSummaryTable")?.innerHTML;
+
+      if (!tableHTML || tableHTML.includes("No summary")) {
+        alert("No route summary loaded.");
+        return;
+      }
+
+      const win = window.open("", "_blank", "width=900,height=600,resizable=yes,scrollbars=yes");
+
+      win.document.write(`
+        <html>
+          <head>
+            <title>Route Summary</title>
+            <style>
+              body { font-family: Roboto, sans-serif; margin: 10px; }
+              table { border-collapse: collapse; width: 100%; }
+              th, td { border: 1px solid #ccc; padding: 6px; text-align: left; }
+              th { background: #f4f4f4; position: sticky; top: 0; }
+            </style>
+          </head>
+          <body>
+            <h2>Route Summary</h2>
+            ${tableHTML}
+          </body>
+        </html>
+      `);
+
+      win.document.close();
+    };
+  }
+//======
+// ===== RESET MAP BUTTON (TRUE HARD RESET FOR THIS APP) =====
+const resetBtn = document.getElementById("resetMapBtn");
+
+if (resetBtn) {
+  resetBtn.addEventListener("click", () => {
+
+    // 1. Reset map view
+    map.setView([39.5, -98.35], 4);
+
+    // 2. Clear drawn polygon
+    drawnLayer.clearLayers();
+
+    // 3. Remove ALL markers from map
+    Object.values(routeDayGroups).forEach(group => {
+      group.layers.forEach(marker => map.removeLayer(marker));
+    });
+
+    // 4. Clear stored marker groups & symbols
+    Object.keys(routeDayGroups).forEach(k => delete routeDayGroups[k]);
+    Object.keys(symbolMap).forEach(k => delete symbolMap[k]);
+
+    // 5. Reset counters & stats
+    document.getElementById("selectionCount").textContent = "0";
+    document.getElementById("statsList").innerHTML = "";
+
+    // 6. Clear route/day checkbox UI
+    document.getElementById("routeCheckboxes").innerHTML = "";
+    buildDayCheckboxes();
+
+    // 7. Reset bounds tracker
+    globalBounds = L.latLngBounds();
+
+    // 8. Clear bottom summary
+    const summary = document.getElementById("routeSummaryTable");
+    if (summary) summary.innerHTML = "No summary loaded";
+
+    // 9. Collapse summary panel
+    const panel = document.getElementById("bottomSummary");
+    const btn = document.getElementById("summaryToggleBtn");
+    if (panel && btn) {
+      panel.classList.add("collapsed");
+      panel.style.height = "40px";
+      btn.textContent = "▲";
+    }
+  });
+}
+
+
+// ===== LIVE GPS BUTTON =====
+const locateBtn = document.getElementById("locateMeBtn");
+
+if (locateBtn) {
+  let tracking = false;
+
+  locateBtn.addEventListener("click", () => {
+    if (!tracking) {
+      startLiveTracking();
+      locateBtn.textContent = "■";
+      locateBtn.classList.add("tracking");   // 🔴 turns button red
+      tracking = true;
+    } else {
+      if (watchId !== null) {
+        navigator.geolocation.clearWatch(watchId);
+        watchId = null;
+      }
+      if (headingMarker) {
+  map.removeLayer(headingMarker);
+  headingMarker = null;
+}
+
+window.removeEventListener("deviceorientation", updateHeading);
+
+
+      locateBtn.textContent = "📍";
+      locateBtn.classList.remove("tracking"); // 🔵 back to blue
+      tracking = false;
+    }
+  });
+}
+
+// ================= FILE MANAGER MODAL =================
+const fileManagerModal = document.getElementById("fileManagerModal");
+const openFileManagerBtn = document.getElementById("openFileManagerBtn");
+const closeFileManagerBtn = document.getElementById("closeFileManager");
+
+if (openFileManagerBtn) {
+  openFileManagerBtn.addEventListener("click", () => {
+    fileManagerModal.style.display = "flex";
+  });
+}
+
+if (closeFileManagerBtn) {
+  closeFileManagerBtn.addEventListener("click", () => {
+    fileManagerModal.style.display = "none";
+  });
+}
+
+window.addEventListener("click", (e) => {
+  if (e.target === fileManagerModal) {
+    fileManagerModal.style.display = "none";
+  }
+});
+  
+
+// ===== DOWNLOAD FULL EXCEL (WITH CONFIRM MODAL) =====
+const downloadBtn = document.getElementById("downloadFullExcelBtn");
+const modal = document.getElementById("downloadConfirmModal");
+const confirmBtn = document.getElementById("confirmDownload");
+const cancelBtn = document.getElementById("cancelDownload");
+
+if (downloadBtn && modal && confirmBtn && cancelBtn) {
+
+  // Open confirmation modal
+  downloadBtn.addEventListener("click", () => {
+
+    if (!window._currentWorkbook) {
+      alert("No Excel file loaded.");
+      return;
+    }
+
+    modal.style.display = "flex";
+  });
+
+  // Cancel download
+  cancelBtn.addEventListener("click", () => {
+    modal.style.display = "none";
+  });
+
+  // Confirm download
+  confirmBtn.addEventListener("click", () => {
+
+    modal.style.display = "none";
+
+    if (!window._currentWorkbook) {
+      alert("No Excel file loaded.");
+      return;
+    }
+
+    const now = new Date();
+
+    const timestamp =
+      now.getFullYear() + "-" +
+      String(now.getMonth() + 1).padStart(2, "0") + "-" +
+      String(now.getDate()).padStart(2, "0") + "_" +
+      String(now.getHours()).padStart(2, "0") + "-" +
+      String(now.getMinutes()).padStart(2, "0") + "-" +
+      String(now.getSeconds()).padStart(2, "0");
+
+    let baseName = window._currentFilePath || "Export";
+    baseName = baseName.replace(/\.[^/.]+$/, "");
+
+    const newFileName = `${baseName}_Downloaded_${timestamp}.xlsx`;
+
+    XLSX.writeFile(window._currentWorkbook, newFileName);
+  });
 }
 
 
 
 
-.file-list > div {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 12px;
+// ===== AUTO-RESIZE MARKERS ON ZOOM =====
+map.on("zoomend", () => {
+  window._labelCount = 0;
+
+  const newSize = getMarkerPixelSize();
+  const currentZoom = map.getZoom();
+  const maxZoom = map.getMaxZoom();
+
+// ===== AUTO TOGGLE SATELLITE STREET NAMES =====
+const currentBase = document.getElementById("baseMapSelect")?.value;
+
+if (currentBase === "satellite") {
+  if (map.getZoom() >= 15) {
+    map.addLayer(satelliteLabelsLayer);
+  } else {
+    map.removeLayer(satelliteLabelsLayer);
+  }
+} else {
+  map.removeLayer(satelliteLabelsLayer);
 }
 
-.file-list .file-actions {
-  display: flex;
-  gap: 12px;
+
+  Object.values(routeDayGroups).forEach(group => {
+    group.layers.forEach(layer => {
+      const base = layer._base;
+      if (!base) return;
+
+      // ---- Resize markers (your existing logic) ----
+      if (layer.setRadius) {
+        layer.setRadius(newSize);
+      } else {
+        const { lat, lon, symbol } = base;
+
+        const scale = 40075016.686 / Math.pow(2, currentZoom + 8);
+        const dLat = newSize * scale / 111320;
+        const dLng = dLat / Math.cos(lat * Math.PI / 180);
+
+        if (symbol.shape === "square") {
+          layer.setBounds([[lat - dLat, lon - dLng], [lat + dLat, lon + dLng]]);
+        }
+
+        if (symbol.shape === "triangle") {
+          layer.setLatLngs([
+            [lat + dLat, lon],
+            [lat - dLat, lon - dLng],
+            [lat - dLat, lon + dLng]
+          ]);
+        }
+
+        if (symbol.shape === "diamond") {
+          layer.setLatLngs([
+            [lat + dLat, lon],
+            [lat, lon + dLng],
+            [lat - dLat, lon],
+            [lat, lon - dLng]
+          ]);
+        }
+      }
+
+     // ---- STREET LABEL LOGIC (MOBILE SAFE) ----
+// ---- STREET LABEL LOGIC (HARD TOGGLE CONTROL) ----
+if (layer._hasStreetLabel) {
+
+  // 🚫 If toggle is OFF, force close and skip
+  if (!window.streetLabelsEnabled) {
+    layer.closeTooltip();
+    return;
+  }
+
+  const bounds = map.getBounds();
+  const isVisible = bounds.contains(layer.getLatLng());
+
+  const MAX_LABELS = 150;
+  if (!window._labelCount) window._labelCount = 0;
+
+  if (
+    currentZoom >= maxZoom - 3 &&
+    map.hasLayer(layer) &&
+    isVisible &&
+    window._labelCount < MAX_LABELS
+  ) {
+    layer.openTooltip();
+    window._labelCount++;
+  } else {
+    layer.closeTooltip();
+  }
 }
 
-.file-list .file-actions button {
-  width: 110px;
-  height: 38px;
+    });
+  });
+});
+
+  
+// Position Locate button correctly for desktop/mobile
+placeLocateButton();
+window.addEventListener("resize", placeLocateButton);
+
+  // Position Locate button correctly for desktop/mobile
+placeLocateButton();
+window.addEventListener("resize", placeLocateButton);
+
+
+// ===== STREET LABEL TOGGLE =====
+const streetToggle = document.getElementById("streetLabelToggle");
+
+if (streetToggle) {
+
+  // Set initial state based on checkbox
+  window.streetLabelsEnabled = streetToggle.checked;
+
+  // Force labels to respect initial state
+  map.whenReady(() => {
+    map.fire("zoomend");
+  });
+
+  streetToggle.addEventListener("change", (e) => {
+    window.streetLabelsEnabled = e.target.checked;
+
+    // Immediately refresh labels
+    map.fire("zoomend");
+  });
+}
+////////////////central save function
+async function saveWorkbookToCloud() {
+
+  const newSheet = XLSX.utils.json_to_sheet(window._currentRows);
+  window._currentWorkbook.Sheets[
+    window._currentWorkbook.SheetNames[0]
+  ] = newSheet;
+
+  const bookType = window._currentFilePath.toLowerCase().endsWith(".xlsm")
+    ? "xlsm"
+    : "xlsx";
+
+  const wbArray = XLSX.write(window._currentWorkbook, {
+    bookType,
+    type: "array"
+  });
+
+  const { error } = await sb.storage
+    .from(BUCKET)
+    .upload(window._currentFilePath, wbArray, {
+      upsert: true,
+      contentType:
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    });
+
+  if (error) {
+    console.error("Cloud Save Error:", error);
+    return false;
+  }
+
+  return true;
+}
+
+
+// ================= COMPLETE STOPS + SAVE TO CLOUD =================
+async function completeStops() {
+  if (!window._currentRows || !window._currentWorkbook || !window._currentFilePath) {
+    alert("No Excel file loaded.");
+    return;
+  }
+
+  const polygon = drawnLayer.getLayers()[0];
+  if (!polygon) {
+    alert("Draw a selection first.");
+    return;
+  }
+
+  let completedCount = 0;
+ 
+
+
+  // find markers inside polygon
+  // 🔥 ONLY process NON-Delivered layers
+Object.entries(routeDayGroups).forEach(([key, group]) => {
+
+  if (key.endsWith("|Delivered")) return;
+  if (!layerVisibilityState[key]) return; // 🔥 ONLY active layer
+
+  group.layers.slice().forEach(marker => {
+
+    const pos = marker.getLatLng();
+
+    if (polygon.getBounds().contains(pos) && marker._rowRef) {
+
+      const row = marker._rowRef;
+
+      row.del_status = "Delivered";
+
+      routeDayGroups[key].layers =
+        routeDayGroups[key].layers.filter(l => l !== marker);
+
+      const deliveredKey = `${row.NEWROUTE}|Delivered`;
+
+      if (!routeDayGroups[deliveredKey]) {
+        routeDayGroups[deliveredKey] = { layers: [] };
+      }
+
+      marker.setStyle?.({
+        color: "#00FF00",
+        fillColor: "#00FF00",
+        fillOpacity: 1,
+        opacity: 1
+      });
+
+      routeDayGroups[deliveredKey].layers.push(marker);
+
+      completedCount++;
+    }
+
+  });
+
+});
+
+
+  if (completedCount === 0) {
+    alert("No stops inside selection.");
+    return;
+  }
+
+  // rewrite worksheet from updated rows
+  const saved = await saveWorkbookToCloud();
+
+if (!saved) {
+  alert("❌ Cloud save failed. Excel file was NOT updated.");
+  return;
+}
+
+// 🔥 remove selection polygon after completion
+drawnLayer.clearLayers();
+  // Save current checkbox states
+document.querySelectorAll("#routeDayLayers input[type='checkbox']")
+  .forEach(cb => {
+    const key = cb.dataset.key;
+    if (key) layerVisibilityState[key] = cb.checked;
+  });
+
+document.querySelectorAll("#deliveredControls input[type='checkbox']")
+  .forEach(cb => {
+    const key = cb.dataset.key;
+    if (key) layerVisibilityState[key] = cb.checked;
+  });
+
+buildRouteDayLayerControls(); // refresh UI
+updateUndoButtonState();
+
+// 🔥 CLEAR selection + counter AFTER UI rebuild
+// 🔥 CLEAR polygon
+if (drawnLayer) {
+  drawnLayer.clearLayers();
+}
+
+// 🔥 Recalculate + restore marker styling properly
+updateSelectionCount();
+updateUndoButtonState();
+
+alert(`${completedCount} stop(s) marked Delivered and saved.`);
+
+
+}
+////////undo delivered stops
+async function undoDelivered() {
+
+  const confirmed = confirm("Are you sure you want to undo Delivered stops inside the selected area?");
+  if (!confirmed) return;
+
+  if (!window._currentRows || !window._currentWorkbook || !window._currentFilePath) {
+    alert("No Excel file loaded.");
+    return;
+  }
+
+
+  const polygon = drawnLayer.getLayers()[0];
+  if (!polygon) {
+    alert("Draw a selection first.");
+    return;
+  }
+
+  let undoCount = 0;
+
+  // 🔥 ONLY loop Delivered groups
+  Object.entries(routeDayGroups).forEach(([key, group]) => {
+
+    if (!key.endsWith("|Delivered")) return;  // HARD FILTER
+
+    group.layers.slice().forEach(marker => {
+
+      const pos = marker.getLatLng();
+
+      // must be inside selection AND actually marked Delivered
+      if (
+        polygon.getBounds().contains(pos) &&
+        marker._rowRef &&
+        String(marker._rowRef.del_status || "").trim().toLowerCase() === "delivered"
+      ) {
+
+        const row = marker._rowRef;
+
+        // remove Delivered from Excel data
+        row.del_status = "";
+
+        // remove marker from Delivered layer
+        routeDayGroups[key].layers =
+          routeDayGroups[key].layers.filter(l => l !== marker);
+
+      // restore original route/day layer
+const originalKey = `${row.NEWROUTE}|${row.NEWDAY}`;
+
+if (!routeDayGroups[originalKey]) {
+  routeDayGroups[originalKey] = { layers: [] };
+}
+
+const symbol = getSymbol(originalKey);
+
+marker.setStyle?.({
+  color: symbol.color,
+  fillColor: symbol.color,
+  fillOpacity: 0.95,
+  opacity: 1
+});
+
+routeDayGroups[originalKey].layers.push(marker);
+
+undoCount++;
+              }
+    });
+  });
+
+  if (undoCount === 0) {
+    alert("No Delivered stops inside selection.");
+    return;
+  }
+
+  // Rewrite Excel sheet
+ const saved = await saveWorkbookToCloud();
+
+if (!saved) {
+  alert("❌ Cloud save failed. Excel file was NOT updated.");
+  return;
+}
+
+
+// 🔥 CLEAR polygon
+if (drawnLayer) {
+  drawnLayer.clearLayers();
+}
+
+// 🔥 Recalculate selection state + restore styling
+updateSelectionCount();
+updateUndoButtonState();
+
+buildRouteDayLayerControls();
+
+alert(`${undoCount} stop(s) restored.`);
+
+}
+ // ================= LOADING OVERLAY =================
+window.showLoading = function(message) {
+  const loader = document.getElementById("loadingOverlay");
+  if (!loader) return;
+
+  loader.classList.remove("hidden");
+
+  const text = loader.querySelector(".loading-text");
+  if (text) {
+    text.textContent = message || "Loading...";
+  }
+};
+
+window.hideLoading = function(message) {
+  const loader = document.getElementById("loadingOverlay");
+  if (!loader) return;
+
+  const text = loader.querySelector(".loading-text");
+
+  if (message && text) {
+    text.textContent = message;
+    setTimeout(() => {
+      loader.classList.add("hidden");
+    }, 900);
+  } else {
+    loader.classList.add("hidden");
+  }
+};
+//////
+  
+// ===== DAYS COLLAPSIBLE =====
+const daysToggle = document.getElementById("daysToggle");
+const daysContent = document.getElementById("daysContent");
+
+if (daysToggle && daysContent) {
+
+  // Closed by default
+  daysContent.classList.add("collapsed");
+
+  daysToggle.addEventListener("click", (e) => {
+
+    // Prevent clicking All/None from toggling collapse
+    if (e.target.id === "daysAll" || e.target.id === "daysNone") return;
+
+    const isCollapsed = daysContent.classList.toggle("collapsed");
+
+    daysToggle.classList.toggle("open", !isCollapsed);
+  });
+}
+//////////
+  // ===== ROUTES COLLAPSIBLE =====
+const routesToggle = document.getElementById("routesToggle");
+const routesContent = document.getElementById("routesContent");
+
+if (routesToggle && routesContent) {
+
+  // Closed by default
+  routesContent.classList.add("collapsed");
+
+  routesToggle.addEventListener("click", (e) => {
+
+    // Prevent clicking All/None from toggling collapse
+    if (e.target.id === "routesAll" || e.target.id === "routesNone") return;
+
+    const isCollapsed = routesContent.classList.toggle("collapsed");
+
+    routesToggle.classList.toggle("open", !isCollapsed);
+  });
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+// ================= COMPLETE BUTTON EVENTS =================
+document.getElementById("completeStopsBtn")
+  ?.addEventListener("click", completeStops);
+
+document.getElementById("completeStopsBtnMobile")
+  ?.addEventListener("click", completeStops);
+//undo delivered stops button event
+  document.getElementById("undoDeliveredBtn")
+  ?.addEventListener("click", undoDelivered);
+
+
+
+  
+  listFiles();
 }
