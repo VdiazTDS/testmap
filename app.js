@@ -959,24 +959,31 @@ data.forEach(file => {
     const li = document.createElement("li");
 
     // OPEN MAP
-    const openBtn = document.createElement("button");
-    openBtn.textContent = "Open Map";
-
    openBtn.onclick = async () => {
-  const { data } = sb.storage.from(BUCKET).getPublicUrl(routeName);
+  try {
 
-  // 🔥 FORCE FRESH FILE (NO CACHE)
-  const urlWithBypass = data.publicUrl + "?v=" + Date.now();
+    showLoading("Loading Excel file...");
 
-  const r = await fetch(urlWithBypass, {
-    cache: "no-store"
-  });
+    const { data } = sb.storage.from(BUCKET).getPublicUrl(routeName);
 
-  // ⭐ STORE CURRENT CLOUD FILE PATH (REQUIRED FOR SAVE)
-  window._currentFilePath = routeName;
+    const urlWithBypass = data.publicUrl + "?v=" + Date.now();
 
-  processExcelBuffer(await r.arrayBuffer());
-  loadSummaryFor(routeName);
+    const r = await fetch(urlWithBypass, {
+      cache: "no-store"
+    });
+
+    window._currentFilePath = routeName;
+
+    processExcelBuffer(await r.arrayBuffer());
+    loadSummaryFor(routeName);
+
+    hideLoading("File Loaded Successfully ✅");
+
+  } catch (err) {
+    console.error(err);
+    hideLoading();
+    alert("Error loading file.");
+  }
 };
 
 
@@ -1030,23 +1037,31 @@ data.forEach(file => {
 async function uploadFile(file) {
   if (!file) return;
 
-  const { error } = await sb.storage
-    .from(BUCKET)
-    .upload(file.name, file, { upsert: true });
+  try {
 
-  if (error) {
+    showLoading("Uploading file...");
+
+    const { error } = await sb.storage
+      .from(BUCKET)
+      .upload(file.name, file, { upsert: true });
+
+    if (error) {
+      throw error;
+    }
+
+    window._currentFilePath = file.name;
+
+    processExcelBuffer(await file.arrayBuffer());
+    listFiles();
+
+    hideLoading("Upload Complete ✅");
+
+  } catch (error) {
     console.error("UPLOAD ERROR:", error);
+    hideLoading();
     alert("Upload failed: " + error.message);
-    return;
   }
-
-  // remember current cloud file
-  window._currentFilePath = file.name;
-
-  processExcelBuffer(await file.arrayBuffer());
-  listFiles();
 }
-
 
 // ================= ROUTE SUMMARY DISPLAY =================
 function showRouteSummary(rows, headers)
