@@ -2007,21 +2007,18 @@ if (searchInput) {
   });
 }
   // ===== CLEAR SEARCH RESULTS =====
-const clearSearchBtn = document.getElementById("clearSearchBtn");
+const clearSearchBtn = document.getElementById("clearSearchResults");
 
 if (clearSearchBtn) {
   clearSearchBtn.addEventListener("click", () => {
 
-    // Clear input
-    if (searchInput) {
-      searchInput.value = "";
-    }
+    // Clear search input
+    const searchInput = document.getElementById("mapSearchInput");
+    if (searchInput) searchInput.value = "";
 
-    // Clear result list
+    // Clear results list
     const resultsList = document.getElementById("searchResultsList");
-    if (resultsList) {
-      resultsList.innerHTML = "";
-    }
+    if (resultsList) resultsList.innerHTML = "";
 
     // Hide results panel
     const resultsPanel = document.getElementById("searchResultsPanel");
