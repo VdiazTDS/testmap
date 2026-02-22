@@ -1693,7 +1693,28 @@ window.removeEventListener("deviceorientation", updateHeading);
   });
 }
 
+// ================= FILE MANAGER MODAL =================
+const fileManagerModal = document.getElementById("fileManagerModal");
+const openFileManagerBtn = document.getElementById("openFileManagerBtn");
+const closeFileManagerBtn = document.getElementById("closeFileManager");
 
+if (openFileManagerBtn) {
+  openFileManagerBtn.addEventListener("click", () => {
+    fileManagerModal.style.display = "flex";
+  });
+}
+
+if (closeFileManagerBtn) {
+  closeFileManagerBtn.addEventListener("click", () => {
+    fileManagerModal.style.display = "none";
+  });
+}
+
+window.addEventListener("click", (e) => {
+  if (e.target === fileManagerModal) {
+    fileManagerModal.style.display = "none";
+  }
+});
   
 
 // ===== DOWNLOAD FULL EXCEL (WITH CONFIRM MODAL) =====
