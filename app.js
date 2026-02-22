@@ -1845,7 +1845,7 @@ if (layer._hasStreetLabel) {
   if (!window._labelCount) window._labelCount = 0;
 
   if (
-    currentZoom >= maxZoom - 2 &&
+    currentZoom >= maxZoom - 3 &&
     map.hasLayer(layer) &&
     isVisible &&
     window._labelCount < MAX_LABELS
