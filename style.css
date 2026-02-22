@@ -1610,3 +1610,13 @@ body.sun-mode .filter-header {
   border: none;
   cursor: pointer;
 }
+
+/* ================= MOBILE SIDEBAR FIX ================= */
+@media (max-width: 768px) {
+
+  .sidebar {
+    margin-top: 60px; /* Adjust if your header is taller */
+    height: calc(100vh - 60px);
+  }
+
+}
