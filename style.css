@@ -1711,3 +1711,23 @@ body.sun-mode .filter-header {
   background-color: #2a93ff;
   color: white;
 }
+
+
+
+
+.file-list > div {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.file-list .file-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.file-list .file-actions button {
+  width: 110px;
+  height: 38px;
+}
