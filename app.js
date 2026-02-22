@@ -959,6 +959,8 @@ data.forEach(file => {
     const li = document.createElement("li");
 
     // OPEN MAP
+    const openBtn = document.createElement("button");
+openBtn.textContent = "Open Map";
    openBtn.onclick = async () => {
   try {
 
