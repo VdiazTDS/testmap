@@ -295,7 +295,6 @@ const baseMaps = {
       maxNativeZoom: 19
     }
   )
-};
 
 // ===== SATELLITE STREET NAME OVERLAY (LIGHTWEIGHT) =====
 const satelliteLabelsLayer = L.tileLayer(
