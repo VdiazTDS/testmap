@@ -397,8 +397,6 @@ function getSymbol(key) {
   return symbolMap[key];
 }
 
-function getMarkerPixelSize() {
-  const z = map.getZoom();
 
   function getMarkerPixelSize() {
   const z = map.getZoom();
