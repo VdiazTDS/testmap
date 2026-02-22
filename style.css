@@ -1624,7 +1624,8 @@ body.sun-mode .filter-header {
 
 
 /* ===== FILE LOADING OVERLAY ===== */
-.file-loading-overlay {
+
+#loadingOverlay {
   position: fixed;
   inset: 0;
   background: rgba(0,0,0,0.6);
@@ -1632,11 +1633,11 @@ body.sun-mode .filter-header {
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 9999;
+  z-index: 999999; /* must be above Leaflet */
 }
 
-.file-loading-overlay.hidden {
-  display: none;
+#loadingOverlay.hidden {
+  display: none !important;
 }
 
 .loading-card {
