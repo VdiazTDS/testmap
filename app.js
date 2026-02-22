@@ -280,9 +280,20 @@ const canvasRenderer = L.canvas({ padding: 0.5 });
 
 // ===== BASE MAP LAYERS =====
 const baseMaps = {
-  streets: L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"),
+  streets: L.tileLayer(
+    "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+    {
+      maxZoom: 19,
+      maxNativeZoom: 19
+    }
+  ),
+
   satellite: L.tileLayer(
-    "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+    "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+    {
+      maxZoom: 20,
+      maxNativeZoom: 19
+    }
   )
 };
 
