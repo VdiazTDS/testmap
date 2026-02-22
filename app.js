@@ -2006,6 +2006,31 @@ if (searchInput) {
     }
   });
 }
+  // ===== CLEAR SEARCH RESULTS =====
+const clearSearchBtn = document.getElementById("clearSearchBtn");
+
+if (clearSearchBtn) {
+  clearSearchBtn.addEventListener("click", () => {
+
+    // Clear input
+    if (searchInput) {
+      searchInput.value = "";
+    }
+
+    // Clear result list
+    const resultsList = document.getElementById("searchResultsList");
+    if (resultsList) {
+      resultsList.innerHTML = "";
+    }
+
+    // Hide results panel
+    const resultsPanel = document.getElementById("searchResultsPanel");
+    if (resultsPanel) {
+      resultsPanel.classList.add("hidden");
+    }
+
+  });
+}
 ////////////////central save function
 async function saveWorkbookToCloud() {
 
