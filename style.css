@@ -1759,13 +1759,12 @@ body.sun-mode .filter-header {
 }
 
 /* ===== SEARCH RESULTS PANEL ===== */
+/* ===== SEARCH RESULTS PANEL ===== */
 .search-results {
   background: #1e1e1e;
   border: 1px solid #333;
   border-radius: 8px;
   margin-top: 10px;
-  max-height: 250px;
-  overflow-y: auto;
   padding: 10px;
 }
 
