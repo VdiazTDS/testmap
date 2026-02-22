@@ -2119,7 +2119,31 @@ async function undoDelivered() {
     alert("No Delivered stops inside selection.");
     return;
   }
-// ================= LOADING OVERLAY =================
+
+  // Rewrite Excel sheet
+ const saved = await saveWorkbookToCloud();
+
+if (!saved) {
+  alert("❌ Cloud save failed. Excel file was NOT updated.");
+  return;
+}
+
+
+// 🔥 CLEAR polygon
+if (drawnLayer) {
+  drawnLayer.clearLayers();
+}
+
+// 🔥 Recalculate selection state + restore styling
+updateSelectionCount();
+updateUndoButtonState();
+
+buildRouteDayLayerControls();
+
+alert(`${undoCount} stop(s) restored.`);
+
+}
+  // ================= LOADING OVERLAY =================
 function showLoading(message) {
   const loader = document.getElementById("loadingOverlay");
   if (!loader) return;
@@ -2147,29 +2171,6 @@ function hideLoading(message) {
   } else {
     loader.classList.add("hidden");
   }
-}
-  // Rewrite Excel sheet
- const saved = await saveWorkbookToCloud();
-
-if (!saved) {
-  alert("❌ Cloud save failed. Excel file was NOT updated.");
-  return;
-}
-
-
-// 🔥 CLEAR polygon
-if (drawnLayer) {
-  drawnLayer.clearLayers();
-}
-
-// 🔥 Recalculate selection state + restore styling
-updateSelectionCount();
-updateUndoButtonState();
-
-buildRouteDayLayerControls();
-
-alert(`${undoCount} stop(s) restored.`);
-
 }
 //////
   
