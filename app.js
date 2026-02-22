@@ -2092,26 +2092,26 @@ async function undoDelivered() {
         routeDayGroups[key].layers =
           routeDayGroups[key].layers.filter(l => l !== marker);
 
-        // restore original route/day layer
-        const originalKey = `${row.NEWROUTE}|${row.NEWDAY}`;
+      // restore original route/day layer
+const originalKey = `${row.NEWROUTE}|${row.NEWDAY}`;
 
-        if (!routeDayGroups[originalKey]) {
-          routeDayGroups[originalKey] = { layers: [] };
-        }
+if (!routeDayGroups[originalKey]) {
+  routeDayGroups[originalKey] = { layers: [] };
+}
 
-        const symbol = getSymbol(originalKey);
+const symbol = getSymbol(originalKey);
 
-        marker.setStyle?.({
-          color: symbol.color,
-          fillColor: symbol.color,
-          fillOpacity: 0.95,
-          opacity: 1
-        });
+marker.setStyle?.({
+  color: symbol.color,
+  fillColor: symbol.color,
+  fillOpacity: 0.95,
+  opacity: 1
+});
 
-        routeDayGroups[originalKey].layers.push(marker);
+routeDayGroups[originalKey].layers.push(marker);
 
-        undoCount++;
-      }
+undoCount++;
+              }
     });
   });
 
