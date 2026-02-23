@@ -814,8 +814,7 @@ header {
   position: fixed;
 
   /* Always stay BELOW the real header height */
-  top: calc(70px + env(safe-area-inset-top));
-
+ top: calc(200px + env(safe-area-inset-top));
   left: 0;
   bottom: 0;
   width: 85%;
