@@ -1804,14 +1804,21 @@ body.sun-mode .filter-header {
 }
 
 
+/* ===== Thicker Saved File Buttons (Phones) ===== */
 @media (max-width: 900px) {
+
   .saved-file-btn {
     display: block;
     width: 100%;
-    padding: 22px;
-    margin-bottom: 16px;
-    font-size: 18px;
+
+    padding: 28px 20px;      /* 👈 makes them thicker */
+    margin-bottom: 18px;
+
+    font-size: 20px;         /* slightly larger text */
     font-weight: 600;
-    border-radius: 12px;
+
+    min-height: 70px;        /* guarantees thickness */
+    border-radius: 14px;
   }
+
 }
