@@ -1802,3 +1802,16 @@ body.sun-mode .filter-header {
 .search-results {
   margin-bottom: 10px;
 }
+
+
+@media (max-width: 900px) {
+  .saved-file-btn {
+    display: block;
+    width: 100%;
+    padding: 22px;
+    margin-bottom: 16px;
+    font-size: 18px;
+    font-weight: 600;
+    border-radius: 12px;
+  }
+}
