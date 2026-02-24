@@ -960,6 +960,7 @@ data.forEach(file => {
 
     // OPEN MAP
     const openBtn = document.createElement("button");
+    openBtn.className = "saved-file-btn";
 openBtn.textContent = "Open Map";
    openBtn.onclick = async () => {
   try {
