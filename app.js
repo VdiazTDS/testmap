@@ -266,6 +266,15 @@ function normalizeName(name) {
     .trim();
 }
 
+// Prevent recursive growth like "..._Downloaded_<ts>_Downloaded_<ts>".
+function getDownloadBaseName(filePath) {
+  const rawName = (filePath || "Export").replace(/\.[^/.]+$/, "");
+  return rawName.replace(
+    /(?:_Downloaded_\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2})+$/i,
+    ""
+  );
+}
+
 
 // ================= MAP SETUP =================
 // Create Leaflet map
@@ -1775,8 +1784,7 @@ if (downloadBtn && modal && confirmBtn && cancelBtn) {
       String(now.getMinutes()).padStart(2, "0") + "-" +
       String(now.getSeconds()).padStart(2, "0");
 
-    let baseName = window._currentFilePath || "Export";
-    baseName = baseName.replace(/\.[^/.]+$/, "");
+    const baseName = getDownloadBaseName(window._currentFilePath);
 
     const newFileName = `${baseName}_Downloaded_${timestamp}.xlsx`;
 
