@@ -70,6 +70,15 @@ header p {
   background: #222;
 }
 
+#currentFileDisplay {
+  background: #1e1e1e;
+  border: 1px solid #333;
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 13px;
+  word-break: break-word;
+}
+
 
 /* ================= FILTER BLOCKS ================= */
 .filter-group {
@@ -503,6 +512,47 @@ header p {
 /* When sidebar is collapsed, keep toggle visible at screen edge */
 #selectionBox.collapsed .sidebar-toggle-right {
   left: -28px;
+}
+
+@media (min-width: 901px) {
+  #selectionBox {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  #selectionBox > strong,
+  #selectionBox > #selectionCount {
+    display: block;
+    text-align: center;
+    margin: 0;
+  }
+
+  #selectionBox > .primary-btn,
+  #selectionBox #desktopLocateContainer .primary-btn {
+    width: 100%;
+  }
+
+  #desktopLocateContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+  }
+
+  #desktopLocateContainer #locateMeBtn {
+    width: 100%;
+    margin-top: 0;
+  }
+
+  #selectionBox .street-toggle-label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin: 0;
+    font-size: 14px;
+  }
 }
 
 
@@ -1486,6 +1536,11 @@ body.sun-mode .filter-group {
 
 body.sun-mode .filter-header {
   background: transparent !important;
+}
+
+body.sun-mode #currentFileDisplay {
+  background: #ffffff;
+  border-color: #dddddd;
 }
 
 /* ================= SUN MODE – SIDEBAR FIX ================= */

@@ -275,6 +275,14 @@ function getDownloadBaseName(filePath) {
   );
 }
 
+function setCurrentFileDisplay(filePath) {
+  const label = document.getElementById("currentFileDisplay");
+  if (!label) return;
+  label.textContent = `Current file: ${filePath || "None"}`;
+}
+
+setCurrentFileDisplay(window._currentFilePath);
+
 
 // ================= MAP SETUP =================
 // Create Leaflet map
@@ -985,6 +993,7 @@ openBtn.textContent = "Open Map";
     });
 
     window._currentFilePath = routeName;
+    setCurrentFileDisplay(window._currentFilePath);
 
     processExcelBuffer(await r.arrayBuffer());
     loadSummaryFor(routeName);
@@ -1062,6 +1071,7 @@ async function uploadFile(file) {
     }
 
     window._currentFilePath = file.name;
+    setCurrentFileDisplay(window._currentFilePath);
 
     processExcelBuffer(await file.arrayBuffer());
     listFiles();
