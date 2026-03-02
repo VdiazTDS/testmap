@@ -17,7 +17,7 @@ window._currentFilePath = null;
 window.streetLabelsEnabled = false;
 
 //======
-// 🔐 Delete protection password
+// 🔐 Delete protection password I know this is not secure, I just wanted to make it harder for ppl to accidentally delete files. You can change or remove this as needed.
 const DELETE_PASSWORD = "Austin1";  // ← change to whatever you want
 
 
