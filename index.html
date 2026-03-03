@@ -76,8 +76,8 @@
 
     <div id="dropZone" aria-label="Upload Excel file">
       <div class="dropzone-title">Upload Route File</div>
-      <div class="dropzone-subtitle">Drag and drop an Excel/CSV file here</div>
-      <div class="dropzone-browse">or click to browse files</div>
+      <div class="dropzone-subtitle">Drop .xlsx, .xls, or .csv here</div>
+      <div class="dropzone-browse">Click to choose file</div>
     </div>
     <input type="file" id="fileInput" accept=".xlsx,.xls,.csv" hidden>
     <div id="currentFileDisplay" class="current-file-display">
@@ -89,11 +89,16 @@
   <button id="openFileManagerBtn" class="primary-btn file-manager-btn" aria-label="Open saved files">
   <span class="file-manager-icon" aria-hidden="true"></span>
   <span class="file-manager-copy">
-    <span class="file-manager-title">Saved Files</span>
-    <span class="file-manager-subtitle">Open, review, or delete uploads</span>
+    <span class="file-manager-title">Open Saved Files</span>
+    <span class="file-manager-subtitle">Load a saved route into the map + route summary</span>
   </span>
 </button>
 </div>
+    <div id="savedFilesGuide" class="saved-files-guide">
+      <div class="saved-files-guide-title">Quick Start</div>
+      <div class="saved-files-guide-step"><span class="saved-files-guide-num">1</span>Open <strong>Saved Files</strong></div>
+      <div class="saved-files-guide-step"><span class="saved-files-guide-num">2</span><strong>Open Map</strong> or <strong>Summary</strong></div>
+    </div>
     <div class="map-view-group">
       <label for="baseMapSelect" class="map-view-label">Map View</label>
       <select id="baseMapSelect" aria-label="Map View">
@@ -111,15 +116,20 @@
 </div>
 
 <div class="filter-group">
-  <div class="filter-header">
-    <strong>Route + Day Layers</strong>
-    <div>
+  <div class="filter-header collapsible-header" id="routeDayToggle">
+    <div class="routes-title">
+      <span class="arrow">▶</span>
+      <strong>Route + Day Layers</strong>
+    </div>
+    <div class="routes-buttons">
       <button class="mini-btn" id="routeDayAll">All</button>
       <button class="mini-btn" id="routeDayNone">None</button>
     </div>
   </div>
 
-  <div id="routeDayLayers"></div>
+  <div id="routeDayContent" class="collapsible-content collapsed">
+    <div id="routeDayLayers"></div>
+  </div>
 </div>
 
     
@@ -192,8 +202,15 @@
 
     
     <div class="filter-group">
-      <strong>Statistics</strong>
-      <ul id="statsList"></ul>
+      <div class="filter-header collapsible-header" id="statsToggle">
+        <div class="routes-title">
+          <span class="arrow">▶</span>
+          <strong>Statistics</strong>
+        </div>
+      </div>
+      <div id="statsContent" class="collapsible-content collapsed">
+        <ul id="statsList"></ul>
+      </div>
     </div>
    
 
@@ -280,6 +297,8 @@
   ↗ Open Summary
 </button>
 
+    <button id="visualizeSummaryBtn" class="primary-btn">Visualize Summary</button>
+
 
     <span class="summary-title">Route Summary</span>
 
@@ -309,7 +328,8 @@
   <!-- FILE MANAGER MODAL -->
 <div id="fileManagerModal" class="modal">
   <div class="modal-content">
-    <h3>Saved Excel Files</h3>
+    <h3>Saved Excel Files (Open Here)</h3>
+    <p class="saved-files-modal-help">Choose <strong>Open Map</strong> to load the map and route summary, or <strong>Summary</strong> for summary only.</p>
 
     <div id="savedFiles" class="file-list"></div>
 
@@ -342,5 +362,7 @@
 </div>
 </body>
 </html>
+
+
 
 
