@@ -1841,6 +1841,13 @@ body.sun-mode .filter-header {
   position: relative;
 }
 
+.header-tools-desktop {
+  position: absolute;
+  top: 50%;
+  right: 15px;
+  transform: translateY(-50%);
+}
+
 .tools-menu-btn {
   border: 1px solid #3a4654;
   background: #1a2430;
@@ -1894,6 +1901,33 @@ body.sun-mode .filter-header {
 
 .tools-menu-item:hover {
   background: #2a3a4d;
+}
+
+.mobile-sidebar-tools {
+  display: none;
+  position: relative;
+  width: 100%;
+}
+
+.mobile-tools-btn {
+  width: 100%;
+}
+
+.mobile-tools-dropdown {
+  top: calc(100% + 6px);
+  right: 0;
+  left: 0;
+  min-width: 0;
+}
+
+@media (max-width: 900px) {
+  .header-tools-desktop {
+    display: none !important;
+  }
+
+  .mobile-sidebar-tools {
+    display: block;
+  }
 }
 
 /* Download button on far left */

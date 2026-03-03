@@ -25,43 +25,48 @@ const HEADER_TOOL_LINKS = [
 ];
 
 function setupHeaderToolsMenu() {
-  const menuBtn = document.getElementById("toolsMenuBtn");
-  const menuDropdown = document.getElementById("toolsMenuDropdown");
-  const menuList = document.getElementById("toolsMenuList");
+  const setupToolsMenuInstance = (btnId, dropdownId, listId) => {
+    const menuBtn = document.getElementById(btnId);
+    const menuDropdown = document.getElementById(dropdownId);
+    const menuList = document.getElementById(listId);
 
-  if (!menuBtn || !menuDropdown || !menuList) return;
+    if (!menuBtn || !menuDropdown || !menuList) return;
 
-  menuList.innerHTML = "";
+    menuList.innerHTML = "";
 
-  HEADER_TOOL_LINKS.forEach(tool => {
-    const link = document.createElement("a");
-    link.className = "tools-menu-item";
-    link.textContent = tool.label;
-    link.href = tool.href || "#";
+    HEADER_TOOL_LINKS.forEach(tool => {
+      const link = document.createElement("a");
+      link.className = "tools-menu-item";
+      link.textContent = tool.label;
+      link.href = tool.href || "#";
 
-    if (!tool.href || tool.href === "#") {
-      link.addEventListener("click", e => e.preventDefault());
-    }
+      if (!tool.href || tool.href === "#") {
+        link.addEventListener("click", e => e.preventDefault());
+      }
 
-    menuList.appendChild(link);
-  });
+      menuList.appendChild(link);
+    });
 
-  const closeMenu = () => {
-    menuDropdown.classList.remove("open");
-    menuBtn.setAttribute("aria-expanded", "false");
+    const closeMenu = () => {
+      menuDropdown.classList.remove("open");
+      menuBtn.setAttribute("aria-expanded", "false");
+    };
+
+    menuBtn.addEventListener("click", e => {
+      e.stopPropagation();
+      const isOpen = menuDropdown.classList.toggle("open");
+      menuBtn.setAttribute("aria-expanded", isOpen ? "true" : "false");
+    });
+
+    menuDropdown.addEventListener("click", e => e.stopPropagation());
+    document.addEventListener("click", closeMenu);
+    document.addEventListener("keydown", e => {
+      if (e.key === "Escape") closeMenu();
+    });
   };
 
-  menuBtn.addEventListener("click", e => {
-    e.stopPropagation();
-    const isOpen = menuDropdown.classList.toggle("open");
-    menuBtn.setAttribute("aria-expanded", isOpen ? "true" : "false");
-  });
-
-  menuDropdown.addEventListener("click", e => e.stopPropagation());
-  document.addEventListener("click", closeMenu);
-  document.addEventListener("keydown", e => {
-    if (e.key === "Escape") closeMenu();
-  });
+  setupToolsMenuInstance("toolsMenuBtn", "toolsMenuDropdown", "toolsMenuList");
+  setupToolsMenuInstance("toolsMenuBtnMobile", "toolsMenuDropdownMobile", "toolsMenuListMobile");
 }
 
 //======
