@@ -80,12 +80,20 @@ document.addEventListener("DOMContentLoaded", () => {
 // ================= SUN MODE TOGGLE =================
 
 const sunToggle = document.getElementById("sunModeToggle");
+const sunToggleText = document.getElementById("sunToggleText");
+
+function updateSunToggleText() {
+  if (!sunToggle || !sunToggleText) return;
+  sunToggleText.textContent = sunToggle.checked ? "Light Mode" : "Dark Mode";
+}
 
 // Load saved preference
 if (localStorage.getItem("sunMode") === "on") {
   document.body.classList.add("sun-mode");
   if (sunToggle) sunToggle.checked = true;
 }
+
+updateSunToggleText();
 
 if (sunToggle) {
   sunToggle.addEventListener("change", () => {
@@ -96,6 +104,7 @@ if (sunToggle) {
       document.body.classList.remove("sun-mode");
       localStorage.setItem("sunMode", "off");
     }
+    updateSunToggleText();
   });
 }
 
@@ -279,11 +288,11 @@ if (hardRefreshBtn) {
     if (window.innerWidth <= 900) {
       if (!refreshArmed) {
         refreshArmed = true;
-        hardRefreshBtn.textContent = "Tap again to refresh";
+        hardRefreshBtn.textContent = "Tap again to refresh app";
 
         setTimeout(() => {
           refreshArmed = false;
-          hardRefreshBtn.textContent = "Refresh";
+          hardRefreshBtn.textContent = "Refresh App";
         }, 2000);
 
         return;
@@ -1529,6 +1538,14 @@ fileInput.addEventListener("change", e => {
   dropZone.addEventListener(evt, e => e.preventDefault());
 });
 
+["dragenter", "dragover"].forEach(evt => {
+  dropZone.addEventListener(evt, () => dropZone.classList.add("drag-active"));
+});
+
+["dragleave", "drop"].forEach(evt => {
+  dropZone.addEventListener(evt, () => dropZone.classList.remove("drag-active"));
+});
+
 // DROP → upload
 dropZone.addEventListener("drop", e => {
   const file = e.dataTransfer.files[0];
@@ -1584,13 +1601,36 @@ const mobileMenuBtn = document.getElementById("mobileMenuBtn");
 
 const overlay = document.querySelector(".mobile-overlay");
 
+function syncMobileSidebarLayout() {
+  if (!sidebar || !pageHeader) return;
+
+  if (window.innerWidth <= 900) {
+    const headerHeight = Math.ceil(pageHeader.getBoundingClientRect().height);
+    sidebar.style.top = `${headerHeight}px`;
+    sidebar.style.height = `calc(100dvh - ${headerHeight}px)`;
+  } else {
+    sidebar.style.top = "";
+    sidebar.style.height = "";
+  }
+}
+
+syncMobileSidebarLayout();
+window.addEventListener("resize", syncMobileSidebarLayout);
+
 if (mobileMenuBtn && sidebar && overlay) {
 
   mobileMenuBtn.addEventListener("click", () => {
+    syncMobileSidebarLayout();
     const open = sidebar.classList.toggle("open");
 
     mobileMenuBtn.textContent = open ? "✕" : "☰";
     overlay.classList.toggle("show", open);
+    if (open) {
+      sidebar.scrollTop = 0;
+      requestAnimationFrame(() => {
+        sidebar.scrollTop = 0;
+      });
+    }
 
     setTimeout(() => map.invalidateSize(), 200);
   });
@@ -1635,21 +1675,21 @@ if (mobileSelBtn && selectionBox) {
     const savedHeight = localStorage.getItem("summaryHeight");
     if (savedHeight) panel.style.height = savedHeight + "px";
 
-    // ===== FORCE MOBILE TO START COLLAPSED =====
-if (window.innerWidth <= 900) {
-  panel.classList.add("collapsed");
-  panel.style.height = "40px";
-}
+    // Start collapsed on initial load (desktop + mobile)
+    panel.classList.add("collapsed");
+    panel.style.height = "40px";
+    if (toggleBtn) toggleBtn.textContent = "▲";
 
-    // Drag resize
-    header.addEventListener("mousedown", e => {
+    // Drag resize (mouse + touch/pen) while preserving button clicks in header
+    header.addEventListener("pointerdown", e => {
+      if (e.target.closest("button")) return;
       isDragging = true;
       startY = e.clientY;
       startHeight = panel.offsetHeight;
       document.body.style.userSelect = "none";
     });
 
-    document.addEventListener("mousemove", e => {
+    document.addEventListener("pointermove", e => {
       if (!isDragging) return;
 
       const delta = startY - e.clientY;
@@ -1662,16 +1702,16 @@ if (window.innerWidth <= 900) {
       panel.style.height = newHeight + "px";
     });
 
-    document.addEventListener("mouseup", () => {
-  if (!isDragging) return;
-  isDragging = false;
-  document.body.style.userSelect = "";
-  localStorage.setItem("summaryHeight", panel.offsetHeight);
+    document.addEventListener("pointerup", () => {
+      if (!isDragging) return;
+      isDragging = false;
+      document.body.style.userSelect = "";
+      localStorage.setItem("summaryHeight", panel.offsetHeight);
 
-  // Hide resize hint after first drag
-  const hint = document.querySelector(".resize-hint");
-  if (hint) hint.style.display = "none";
-});
+      // Hide resize hint after first drag
+      const hint = document.querySelector(".resize-hint");
+      if (hint) hint.style.display = "none";
+    });
 
 
     // Collapse toggle
